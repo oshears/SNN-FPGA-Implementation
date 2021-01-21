@@ -1,0 +1,15 @@
+Vivado Simulator 2020.2
+Copyright 1986-1999, 2001-2020 Xilinx, Inc. All Rights Reserved.
+Running: /home/oshears/Xilinx/Vivado/2020.2/bin/unwrapped/lnx64.o/xelab -wto 7e1723427e6045ea904f496799537618 --incr --debug typical --relax --mt 8 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot if_neuron_tb_behav xil_defaultlib.if_neuron_tb xil_defaultlib.glbl -log elaborate.log 
+Using 8 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+WARNING: [VRFC 10-5021] port 'inputs' is not connected on this instance [/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/if_neuron_tb.v:9]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.if_neuron
+Compiling module xil_defaultlib.if_neuron_tb
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot if_neuron_tb_behav
