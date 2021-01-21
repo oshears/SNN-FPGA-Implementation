@@ -9,12 +9,17 @@ module if_neuron
 (
     input clk,
     input rst,
-    input [num_inputs:0][weight_size-1:0] inputs,
-    input [num_inputs:0] spike_in,
+    input [num_inputs-1:0] spike_in,
     output spike_out
 );
 
 reg [weight_size - 1:0] potential;
+
+integer input_index;
+
+assign spike_out = (potential >= threshold_potential) ? 1 : 0;
+
+reg [num_inputs-1:0] input_weights [weight_size-1:0] = 0;
 
 always @(posedge clk, posedge rst)
 begin
@@ -23,7 +28,14 @@ begin
     end
     else
     begin
-        potential = potential + 1;
+        if(potential < threshold_potential)
+            for(input_index = 0; input_index < num_inputs; input_index = input_index + 1) begin
+                if(spike_in[input_index])
+                    potential = potential + input_weights[input_index];
+            end
+            //potential = potential + 1;
+        else
+            potential = reset_potential;
     end
 end
 
