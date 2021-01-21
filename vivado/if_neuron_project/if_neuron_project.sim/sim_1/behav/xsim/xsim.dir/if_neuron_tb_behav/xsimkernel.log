@@ -1,4 +1,0 @@
-Running: xsim.dir/if_neuron_tb_behav/xsimk -simmode gui -wdb if_neuron_tb_behav.wdb -simrunnum 0 -socket 43945
-Design successfully loaded
-Design Loading Memory Usage: 33580 KB (Peak: 33700 KB)
-Design Loading CPU Usage: 30 ms

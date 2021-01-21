@@ -1,7 +1,0 @@
-INFO: [VRFC 10-2263] Analyzing Verilog file "/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/src/if_neuron.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module if_neuron
-INFO: [VRFC 10-2263] Analyzing Verilog file "/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/if_neuron_tb.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module if_neuron_tb
-WARNING: [VRFC 10-2502] extra semicolon in $unit (global) scope [/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/if_neuron_tb.v:20]
-INFO: [VRFC 10-2263] Analyzing Verilog file "/home/oshears/Documents/vt/research/code/verilog/snn_fpga/vivado/if_neuron_project/if_neuron_project.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module glbl
