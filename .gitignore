@@ -1,0 +1,27 @@
+# Vivado Files
+if_neuron_project
+*.jou
+*.log
+*.wdb
+*.pb
+xsim.dir
+.Xil
+*.str
+logs
+*.debug
+vivado_pid*
+
+# Vitis Files
+.metadata
+hello_world_test_app*
+/vitis/neuromorphic
+.analytics
+RemoteSystemsTempFiles
+petalinux_neuromorphic
+test_linux_app
+test_linux_app_system
+
+# PetaLinux Files
+/embedded_linux/neuromorphic_peta_linux
+/embedded_linux/demo_petalinux
+embedded_linux/avnet-digilent-zedboard-v2020.2-final.bsp
