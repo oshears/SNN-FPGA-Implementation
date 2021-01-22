@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module if_neuron_tb;
+module if_network_tb;
 
 reg clk = 0;
 reg rst = 0;

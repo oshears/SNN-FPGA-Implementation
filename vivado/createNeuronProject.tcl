@@ -13,6 +13,7 @@ add_files {
 
 
 move_files -fileset sim_1 [get_files  ../rtl/tb/if_neuron_tb.v]
+add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
 
 set_property top if_neuron_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
