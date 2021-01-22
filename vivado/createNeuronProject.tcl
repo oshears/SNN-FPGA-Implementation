@@ -19,9 +19,11 @@ move_files -fileset sim_1 [get_files  ../rtl/tb/if_neuron_tb.v]
 move_files -fileset sim_1 [get_files  ../rtl/tb/if_network_tb.v]
 move_files -fileset sim_1 [get_files  ../rtl/tb/if_network_test_tb.v]
 add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
-add_files -fileset sim_1 ../rtl/tb/neuron_test_weights/
+add_files -fileset sim_1 ../rtl/tb/neuron_weights/
+# add_files -fileset sim_1 ../rtl/tb/neuron_test_weights/
 
-set_property top if_network_test_tb [get_filesets sim_1]
+set_property top if_network_tb [get_filesets sim_1]
+# set_property top if_network_test_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
 
 update_compile_order -fileset sources_1
