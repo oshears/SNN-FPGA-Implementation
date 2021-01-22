@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 
-module if_network_tb;
+module if_network_test_tb;
 
-localparam NUM_INPUTS = 784;
-localparam NUM_OUTPUTS = 100;
-localparam THRESH = 25769803776;
-localparam RESET = 10737418240;
-localparam WEIGHT_SIZE = 4;
+localparam NUM_INPUTS = 4;
+localparam NUM_OUTPUTS = 1;
+localparam THRESH = 15;
+localparam RESET = 0;
 localparam REFRAC = 5;
+localparam WEIGHT_SIZE = 32;
 
 reg clk = 0;
 reg rst = 0;

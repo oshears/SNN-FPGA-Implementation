@@ -1,8 +1,9 @@
 `timescale 1ns / 1ps
 module if_network 
 #(
-    parameter THRESH=10,
+    parameter THRESH=15,
     parameter RESET=0,
+    parameter REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_OUTPUTS=1
@@ -22,6 +23,7 @@ generate
     #(
         .THRESH(THRESH),
         .RESET(RESET),
+        .REFRAC(REFRAC),
         .WEIGHT_SIZE(WEIGHT_SIZE),
         .NUM_INPUTS(NUM_INPUTS),
         .WEIGHT_FILENAME({i+48,".txt"})
