@@ -10,11 +10,11 @@ wire spike_out;
 
 if_neuron 
 #(
-    .threshold_potential(10),
-    .reset_potential(0),
-    .weight_size(32),
-    .num_inputs(1),
-    .weight_filename("neuron.txt")
+    .THRESH(10),
+    .RESET(0),
+    .WEIGHT_SIZE(32),
+    .NUM_INPUTS(1),
+    .WEIGHT_FILENAME("neuron.txt")
 )
 uut
 (
