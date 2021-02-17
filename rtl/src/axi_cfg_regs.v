@@ -6,8 +6,6 @@ parameter C_S_AXI_DATA_WIDTH = 32,
 parameter C_S_AXI_ADDR_WIDTH = 9 
 )
 (
-    clk, 
-    rst,
     S_AXI_ACLK,     
     S_AXI_ARESETN,  
     S_AXI_AWADDR,   
@@ -30,9 +28,6 @@ parameter C_S_AXI_ADDR_WIDTH = 9
     debug
 );
 
-
-input clk;
-input rst;
 
 input S_AXI_ACLK;   
 input S_AXI_ARESETN;

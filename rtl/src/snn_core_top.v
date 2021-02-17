@@ -76,9 +76,6 @@ axi_cfg_regs
 )
 axi_cfg_regs
 (
-    // System Signals
-    .clk(S_AXI_ACLK),
-    .rst(RESET),
     // Debug Register Output
     .debug(debug),
     //AXI Signals

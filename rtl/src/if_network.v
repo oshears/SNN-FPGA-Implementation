@@ -52,7 +52,7 @@ generate
     hidden_layer (
         .clk(clk),
         .rst(rst),
-        .spike_in(hidden_layer_connections[((i + 1) * NUM_HIDDEN_LAYER_NEURONS) - 1 : (i * NUM_HIDDEN_LAYER_NEURONS) - 1]),
+        .spike_in(hidden_layer_connections[((i + 1) * NUM_HIDDEN_LAYER_NEURONS) - 1 : (i * NUM_HIDDEN_LAYER_NEURONS)]),
         .spike_out(hidden_layer_connections[((i + 2) * NUM_HIDDEN_LAYER_NEURONS) - 1 : ((i + 1) * NUM_HIDDEN_LAYER_NEURONS)])
     );
 end 
@@ -71,7 +71,7 @@ if_layer
 hidden_layer_out (
     .clk(clk),
     .rst(rst),
-    .spike_in(spike_in),
+    .spike_in(hidden_layer_connections[((NUM_LAYERS + 1) * NUM_HIDDEN_LAYER_NEURONS) - 1 : (NUM_LAYERS * NUM_HIDDEN_LAYER_NEURONS)]),
     .spike_out(spike_out)
 );
 
