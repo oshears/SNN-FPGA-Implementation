@@ -1,5 +1,6 @@
 # Vivado Files
 if_neuron_project
+snn_core_project
 *.jou
 *.log
 *.wdb
