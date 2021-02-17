@@ -9,6 +9,7 @@ set_property board_part em.avnet.com:zed:part0:1.4 [current_project]
 add_files {
     ../rtl/src/counter.v 
     ../rtl/src/binary_spike_gen.v 
+    ../rtl/src/spike_counter.v 
     ../rtl/src/if_neuron.v 
     ../rtl/src/if_layer.v 
     ../rtl/src/if_network.v 

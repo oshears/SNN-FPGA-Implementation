@@ -132,5 +132,17 @@ if_network
     .spike_out(spike_out)
 );
 
+spike_counter
+#(
+    .NUM_INPUTS(NUM_OUTPUTS),
+    .COUNTER_SIZE(4)
+)
+spike_counter
+(
+    .spike_in(spike_out),
+    .rst(rst),
+    .counter_out()
+);
+
 
 endmodule
