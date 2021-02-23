@@ -9,7 +9,6 @@ module if_layer
     parameter NUM_OUTPUTS=1
 )
 (
-    input clk,
     input rst,
     input [NUM_INPUTS-1:0] spike_in,
     output [NUM_OUTPUTS-1:0] spike_out
@@ -30,7 +29,6 @@ generate
         .WEIGHT_FILENAME("neuron.txt")
     )
     if_neuron (
-        .clk(clk),
         .rst(rst),
         .spike_in(spike_in),
         .spike_out(spike_out[i])

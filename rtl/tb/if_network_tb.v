@@ -9,7 +9,6 @@ localparam RESET = 10737418240;
 localparam WEIGHT_SIZE = 4;
 localparam REFRAC = 5;
 
-reg clk = 0;
 reg rst = 0;
 reg [NUM_INPUTS-1:0] spike_in = 0;
 
@@ -29,16 +28,11 @@ if_network
 )
 uut
 (
-    .clk(clk),
     .rst(rst),
     .spike_in(spike_in),
     .spike_out(spike_out)
 );
 
-initial begin
-    clk = 0;
-    forever #1 clk = ~clk;
-end 
 
 initial begin
     rst = 1;
@@ -54,4 +48,4 @@ initial begin
     $finish;
 end
 
-endmodule;
+endmodule
