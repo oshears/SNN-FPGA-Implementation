@@ -15,7 +15,7 @@ module if_layer_controller
 genvar i;
 generate
     for (i=0; i<NUM_OUTPUTS; i=i+1) begin : spike_resets
-        always @(clk, posedge rst) begin
+        always @(posedge clk, posedge rst) begin
             if (rst)
                 neuron_rst = 1;
             else
