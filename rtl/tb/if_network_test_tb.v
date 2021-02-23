@@ -4,11 +4,14 @@ module if_network_test_tb;
 
 localparam NUM_INPUTS = 4;
 localparam NUM_OUTPUTS = 1;
+localparam NUM_LAYERS = 2;
+localparam NUM_HIDDEN_LAYER_NEURONS = 2;
 localparam THRESH = 15;
 localparam RESET = 0;
 localparam REFRAC = 5;
 localparam WEIGHT_SIZE = 32;
 
+reg clk = 0;
 reg rst = 0;
 reg [NUM_INPUTS-1:0] spike_in = 0;
 
@@ -24,14 +27,22 @@ if_network
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_OUTPUTS)
+    .NUM_OUTPUTS(NUM_OUTPUTS),
+    .NUM_LAYERS(NUM_LAYERS),
+    .NUM_HIDDEN_LAYER_NEURONS(NUM_HIDDEN_LAYER_NEURONS)
 )
 uut
 (
+    .clk(clk),
     .rst(rst),
     .spike_in(spike_in),
     .spike_out(spike_out)
 );
+
+initial begin
+    clk = 0;
+    forever #1 clk = ~clk;
+end 
 
 task WAIT( input [31:0] timesteps);
     integer i;
