@@ -37,6 +37,8 @@ update_compile_order -fileset sim_1
 set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
 set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets sim_1]
 
+# Load Constraints
+read_xdc ../xdc/snn_fpga_top.xdc
+
 launch_simulation
 
-add_wave {{/if_network_tb/uut}} 
