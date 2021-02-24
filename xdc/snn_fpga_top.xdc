@@ -7,5 +7,3 @@ set_property IOSTANDARD LVCMOS18 [get_ports {spike_out}];
 set_property IOSTANDARD LVCMOS18 [get_ports {spike_in}];
 set_property IOSTANDARD LVCMOS18 [get_ports {clk}];
 set_property IOSTANDARD LVCMOS18 [get_ports {rst}];
-
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets spike_in_IBUF]

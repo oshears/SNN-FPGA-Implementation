@@ -44,6 +44,7 @@ set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets s
 
 reset_run synth_1
 launch_runs impl_1 -to_step write_bitstream -jobs 16
+wait_on_run impl_1
 
 open_hw_manager
 connect_hw_server -allow_non_jtag

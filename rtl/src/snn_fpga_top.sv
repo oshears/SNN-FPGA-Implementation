@@ -7,6 +7,9 @@ module snn_fpga_top
     output wire spike_out
 );
 
+reg spike_in_i;
+
+
 if_network 
 #(
     .THRESH(4),
@@ -27,6 +30,7 @@ if_network
 );
 
 
+
 // if_neuron 
 // #(
 //     .THRESH(4),
@@ -41,6 +45,10 @@ if_network
 //     .spike_out(spike_out),
 //     .spike_in(spike_in)
 // );
+
+always @(clk) begin
+    spike_in_i = spike_in;
+end
 
 
 endmodule
