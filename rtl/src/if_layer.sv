@@ -6,28 +6,27 @@ module if_layer
     parameter REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    parameter NUM_OUTPUTS=1
+    parameter NUM_NEURONS=1
 )
 (
     input clk,
     input rst,
     input [NUM_INPUTS-1:0] spike_in,
-    output [NUM_OUTPUTS-1:0] spike_out
+    output [NUM_NEURONS-1:0] spike_out
 );
 
-wire [NUM_OUTPUTS-1:0] spike_out_i;
-wire [NUM_OUTPUTS-1:0] neuron_rst;
+wire [NUM_NEURONS-1:0] spike_out_i;
+wire [NUM_NEURONS-1:0] neuron_rst;
 
 assign spike_out = spike_out_i;
 
 genvar i;
 generate
-    for (i=0; i<NUM_OUTPUTS; i=i+1) begin : output_neurons
+    for (i=0; i<NUM_NEURONS; i=i+1) begin : output_neurons
     if_neuron 
     #(
         .THRESH(THRESH),
         .RESET(RESET),
-        .REFRAC(REFRAC),
         .WEIGHT_SIZE(WEIGHT_SIZE),
         .NUM_INPUTS(NUM_INPUTS),
         //.WEIGHT_FILENAME({i+48,".txt"})
@@ -45,7 +44,7 @@ if_layer_controller
 #(
     .REFRAC(REFRAC),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_OUTPUTS)
+    .NUM_NEURONS(NUM_NEURONS)
 )
 if_layer_controller
 (

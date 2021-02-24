@@ -24,7 +24,6 @@ if_network
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_OUTPUTS)
 )
 uut
 (

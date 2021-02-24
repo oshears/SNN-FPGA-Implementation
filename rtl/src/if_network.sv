@@ -6,16 +6,14 @@ module if_network
     parameter REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    parameter NUM_OUTPUTS=1,
     parameter NUM_LAYERS=1,
-    // parameter NUM_HIDDEN_LAYER_NEURONS=4,
     parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1}
 )
 (
     input clk,
     input rst,
     input [NUM_INPUTS-1:0] spike_in,
-    output [NUM_OUTPUTS-1:0] spike_out
+    output [NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1] - 1 : 0] spike_out
 );
 
 genvar i;
@@ -32,7 +30,7 @@ if (NUM_LAYERS == 1) begin
         .REFRAC(REFRAC),
         .WEIGHT_SIZE(WEIGHT_SIZE),
         .NUM_INPUTS(NUM_INPUTS),
-        .NUM_OUTPUTS(NUM_HIDDEN_LAYER_NEURONS[0])
+        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
     )
     hidden_layer_in (
         .clk(clk),
@@ -54,7 +52,7 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_HIDDEN_LAYER_NEURONS[0])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
 )
 hidden_layer_in (
     .clk(clk),
@@ -71,7 +69,7 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[0]),
-    .NUM_OUTPUTS(NUM_HIDDEN_LAYER_NEURONS[1])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[1])
 )
 hidden_layer_out (
     .clk(clk),
@@ -81,63 +79,66 @@ hidden_layer_out (
 );
 
 end
-// else if (NUM_LAYERS > 2) begin
+else if (NUM_LAYERS > 2) begin
 
-// wire [((NUM_LAYERS+2) * NUM_HIDDEN_LAYER_NEURONS) - 1 : 0] hidden_layer_connections; 
+// Hidden Layer 1
+if_layer 
+#(
+    .THRESH(THRESH),
+    .RESET(RESET),
+    .REFRAC(REFRAC),
+    .WEIGHT_SIZE(WEIGHT_SIZE),
+    .NUM_INPUTS(NUM_INPUTS),
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
+)
+hidden_layer_in (
+    .clk(clk),
+    .rst(rst),
+    .spike_in(spike_in),
+    .spike_out(hidden_layer_connections[0].hidden_layer_i_connections)
+);
 
-// // Hidden Layer 1
-// if_layer 
-// #(
-//     .THRESH(THRESH),
-//     .RESET(RESET),
-//     .REFRAC(REFRAC),
-//     .WEIGHT_SIZE(WEIGHT_SIZE),
-//     .NUM_INPUTS(NUM_INPUTS),
-//     .NUM_OUTPUTS(NUM_HIDDEN_LAYER_NEURONS)
-// )
-// hidden_layer_in (
-//     .clk(clk),
-//     .rst(rst),
-//     .spike_in(spike_in),
-//     .spike_out(hidden_layer_connections[NUM_HIDDEN_LAYER_NEURONS - 1 : 0])
-// );
+for (i=0; i < NUM_LAYERS - 1; i=i+1) begin : hidden_layer_connections
+    wire [NUM_HIDDEN_LAYER_NEURONS[i] - 1 : 0] hidden_layer_i_connections; 
+end 
 
-// for (i=0; i<NUM_LAYERS - 2; i=i+1) begin : output_layers
-//     if_layer 
-//     #(
-//         .THRESH(THRESH),
-//         .RESET(RESET),
-//         .REFRAC(REFRAC),
-//         .WEIGHT_SIZE(WEIGHT_SIZE),
-//         .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS),
-//         .NUM_OUTPUTS(NUM_HIDDEN_LAYER_NEURONS)
-//     )
-//     hidden_layer (
-//         .clk(clk),
-//         .rst(rst),
-//         .spike_in(hidden_layer_connections[((i + 1) * NUM_HIDDEN_LAYER_NEURONS) - 1 : (i * NUM_HIDDEN_LAYER_NEURONS)]),
-//         .spike_out(hidden_layer_connections[((i + 2) * NUM_HIDDEN_LAYER_NEURONS) - 1 : ((i + 1) * NUM_HIDDEN_LAYER_NEURONS)])
-//     );
-// end 
+for (i=0; i<NUM_LAYERS - 2; i=i+1) begin : hidden_layers
 
-// // Output Layer
-// if_layer 
-// #(
-//     .THRESH(THRESH),
-//     .RESET(RESET),
-//     .REFRAC(REFRAC),
-//     .WEIGHT_SIZE(WEIGHT_SIZE),
-//     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS),
-//     .NUM_OUTPUTS(NUM_OUTPUTS)
-// )
-// hidden_layer_out (
-//     .clk(clk),
-//     .rst(rst),
-//     .spike_in(hidden_layer_connections[((NUM_LAYERS + 1) * NUM_HIDDEN_LAYER_NEURONS) - 1 : (NUM_LAYERS * NUM_HIDDEN_LAYER_NEURONS)]),
-//     .spike_out(spike_out)
-// );
+    if_layer 
+    #(
+        .THRESH(THRESH),
+        .RESET(RESET),
+        .REFRAC(REFRAC),
+        .WEIGHT_SIZE(WEIGHT_SIZE),
+        .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[i]),
+        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[i + 1])
+    )
+    hidden_layer (
+        .clk(clk),
+        .rst(rst),
+        .spike_in(hidden_layer_connections[i].hidden_layer_i_connections),
+        .spike_out(hidden_layer_connections[i + 1].hidden_layer_i_connections)
+    );
+end 
 
-// end
+// Output Layer
+if_layer 
+#(
+    .THRESH(THRESH),
+    .RESET(RESET),
+    .REFRAC(REFRAC),
+    .WEIGHT_SIZE(WEIGHT_SIZE),
+    .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 2]),
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1])
+)
+hidden_layer_out (
+    .clk(clk),
+    .rst(rst),
+    .spike_in(hidden_layer_connections[NUM_LAYERS - 2].hidden_layer_i_connections),
+    .spike_out(spike_out)
+);
+
+end
 
 endgenerate
 

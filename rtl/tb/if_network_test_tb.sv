@@ -2,20 +2,19 @@
 
 module if_network_test_tb;
 
-localparam NUM_INPUTS = 4;
-localparam NUM_OUTPUTS = 1;
-localparam NUM_LAYERS = 2;
-localparam NUM_HIDDEN_LAYER_NEURONS = 2;
-localparam THRESH = 15;
+localparam NUM_INPUTS = 8;
+localparam NUM_LAYERS = 3;
+localparam THRESH = 1;
 localparam RESET = 0;
-localparam REFRAC = 5;
+localparam REFRAC = 0;
 localparam WEIGHT_SIZE = 32;
+localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {1,2,4};
 
 reg clk = 0;
 reg rst = 0;
 reg [NUM_INPUTS-1:0] spike_in = 0;
 
-wire [NUM_OUTPUTS-1:0] spike_out;
+wire [NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1] - 1 : 0] spike_out;
 
 integer i = 0;
 integer j = 0;
@@ -27,9 +26,8 @@ if_network
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_OUTPUTS),
     .NUM_LAYERS(NUM_LAYERS),
-    .NUM_HIDDEN_LAYER_NEURONS({2,4})
+    .NUM_HIDDEN_LAYER_NEURONS(NUM_HIDDEN_LAYER_NEURONS)
 )
 uut
 (

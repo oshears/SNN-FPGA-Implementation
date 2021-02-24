@@ -16,7 +16,6 @@ add_files {
     ../rtl/src/if_layer_controller.sv 
     ../rtl/src/if_network.sv 
     ../rtl/src/snn_fpga_top.sv
-    ../rtl/src/event_based_top.sv
     }
 
 

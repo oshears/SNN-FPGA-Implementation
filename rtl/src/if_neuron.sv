@@ -3,7 +3,6 @@ module if_neuron
 #(
     parameter THRESH=10,
     parameter RESET=0,
-    parameter REFRAC=0,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter WEIGHT_FILENAME="neuron.txt"
@@ -15,32 +14,20 @@ module if_neuron
 );
 
 reg [WEIGHT_SIZE - 1:0] potential = 0;
+reg threshold = THRESH;
 
-integer input_index;
+integer input_index = 0;
+integer weight_index = 0;
 
-assign spike_out = (potential >= THRESH) ? 1 : 0;
+assign spike_out = (potential >= threshold) ? 1 : 0;
 
-reg [WEIGHT_SIZE-1:0] weight_mem [NUM_INPUTS-1:0];
-
-integer weight_file;
-reg [WEIGHT_SIZE-1:0] weight_file_input;
-
-reg [31:0] refrac_counter = 0;
-reg refrac_en = 0;
-wire refrac_done = 0;
-reg refrac_rst = 0;
-reg [1:0] current_state = 0;
-reg [1:0] next_state = 0;
-reg accumulator_en = 0;
-
+// reg [WEIGHT_SIZE-1:0] weight_mem [NUM_INPUTS-1:0];
 
 wire [WEIGHT_SIZE - 1 : 0] spike_accumulator_outputs [NUM_INPUTS - 1 : 0];
 reg  [WEIGHT_SIZE - 1 : 0]  spike_accumulator_weights [NUM_INPUTS - 1 : 0];
 
-localparam NORMAL_STATE = 0;
-localparam REFRACTORY_STATE = 1;
-
 // initialize weight memory
+/*
 initial begin
     /*
     weight_file = $fopen(WEIGHT_FILENAME,"r");
@@ -52,18 +39,13 @@ initial begin
     end
     
     $fclose(weight_file);
-    */
-    for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
-        spike_accumulator_weights[input_index] = 1;
-    end
 end
+*/
 
 // value counters for each input
 genvar i;
 generate
     for (i=0; i<NUM_INPUTS; i=i+1) begin : spike_accumulators
-        // reg  [WEIGHT_SIZE - 1: 0] spike_accumulator_weight;
-        // wire  [WEIGHT_SIZE - 1: 0] spike_accumulator_output;
         
         spike_accumulator #(
             .DATA_WIDTH(WEIGHT_SIZE)
@@ -71,7 +53,6 @@ generate
         spike_accumulator
         (
             .spike_in(spike_in[i]),
-            // .spike_weight(spike_accumulator_weight),
             .spike_weight(spike_accumulator_weights[i]),
             .rst(rst),
             .dout(spike_accumulator_outputs[i])
@@ -81,11 +62,18 @@ generate
     
 endgenerate
 
-always @(spike_accumulator_outputs) begin
+always_comb begin
     potential = 0;
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
         potential = potential + spike_accumulator_outputs[input_index];
     end 
+end
+
+always @(posedge rst) begin
+    for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
+        spike_accumulator_weights[weight_index] = 32'b1;
+    end
+    threshold = THRESH;
 end
 
 
