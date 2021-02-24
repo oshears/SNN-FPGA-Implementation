@@ -7,8 +7,8 @@ module snn_fpga_top
     output reg spike_out
 );
 
-reg spike_in_i;
-reg spike_out_i;
+reg spike_in_i = 0;
+reg spike_out_i = 0;
 
 
 if_network 

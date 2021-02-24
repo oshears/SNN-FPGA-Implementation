@@ -9,9 +9,8 @@ module snn_core_top
     parameter REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    parameter NUM_OUTPUTS=1,
     parameter NUM_LAYERS=1,
-    parameter NUM_HIDDEN_LAYER_NEURONS=4
+    parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1}
 )
 (
     // axi_cfg_regs
@@ -59,6 +58,7 @@ output S_AXI_BVALID;
 
 
 wire rst;
+wire snn_rst;
 
 assign rst = ~S_AXI_ARESETN;
 
@@ -120,14 +120,13 @@ if_network
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_OUTPUTS(NUM_OUTPUTS),
     .NUM_LAYERS(NUM_LAYERS),
     .NUM_HIDDEN_LAYER_NEURONS(NUM_HIDDEN_LAYER_NEURONS)
 )
 if_network
 (
     .clk(S_AXI_ACLK),
-    .rst(rst),
+    .rst(snn_rst),
     .spike_in(spike_in),
     .spike_out(spike_out)
 );
@@ -140,7 +139,7 @@ spike_counter
 spike_counter
 (
     .spike_in(spike_out),
-    .rst(rst),
+    .rst(snn_rst),
     .counter_out()
 );
 

@@ -14,7 +14,7 @@ module if_neuron
 );
 
 reg [WEIGHT_SIZE - 1:0] potential = 0;
-reg threshold = THRESH;
+reg [WEIGHT_SIZE - 1:0] threshold = THRESH;
 
 integer input_index = 0;
 integer weight_index = 0;
@@ -66,6 +66,12 @@ always_comb begin
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
         potential = potential + spike_accumulator_outputs[input_index];
     end 
+end
+
+initial begin
+    for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
+        spike_accumulator_weights[weight_index] = 32'b1;
+    end
 end
 
 always @(posedge rst) begin
