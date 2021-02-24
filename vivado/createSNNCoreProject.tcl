@@ -7,19 +7,19 @@ create_project snn_core_project ./snn_core_project -part xc7z020clg484-1 -force
 set_property board_part em.avnet.com:zed:part0:1.4 [current_project]
 
 add_files {
-    ../rtl/src/counter.v 
-    ../rtl/src/binary_spike_gen.v 
-    ../rtl/src/spike_counter.v 
-    ../rtl/src/if_neuron.v 
-    ../rtl/src/if_layer.v 
-    ../rtl/src/if_network.v 
-    ../rtl/src/axi_cfg_regs.v 
-    ../rtl/src/snn_core_top.v 
-    ../rtl/tb/snn_core_top_tb.v
+    ../rtl/src/counter.sv 
+    ../rtl/src/binary_spike_gen.sv 
+    ../rtl/src/spike_counter.sv 
+    ../rtl/src/if_neuron.sv 
+    ../rtl/src/if_layer.sv 
+    ../rtl/src/if_network.sv 
+    ../rtl/src/axi_cfg_regs.sv 
+    ../rtl/src/snn_core_top.sv 
+    ../rtl/tb/snn_core_top_tb.sv
     }
 
 
-move_files -fileset sim_1 [get_files  ../rtl/tb/snn_core_top_tb.v]
+move_files -fileset sim_1 [get_files  ../rtl/tb/snn_core_top_tb.sv]
 add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
 add_files -fileset sim_1 ../rtl/tb/neuron_weights/
 
