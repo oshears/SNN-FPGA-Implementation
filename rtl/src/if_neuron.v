@@ -42,7 +42,7 @@ localparam REFRACTORY_STATE = 1;
 
 // initialize weight memory
 initial begin
-    
+    /*
     weight_file = $fopen(WEIGHT_FILENAME,"r");
 
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
@@ -52,6 +52,10 @@ initial begin
     end
     
     $fclose(weight_file);
+    */
+    for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
+        spike_accumulator_weights[input_index] = 1;
+    end
 end
 
 // value counters for each input

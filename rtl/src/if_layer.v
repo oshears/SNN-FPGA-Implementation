@@ -34,7 +34,7 @@ generate
         .WEIGHT_FILENAME("neuron.txt")
     )
     if_neuron (
-        .rst(neuron_rst),
+        .rst(neuron_rst[i]),
         .spike_in(spike_in),
         .spike_out(spike_out_i[i])
     );

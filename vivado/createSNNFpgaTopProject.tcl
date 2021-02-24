@@ -16,6 +16,7 @@ add_files {
     ../rtl/src/if_layer_controller.v 
     ../rtl/src/if_network.v 
     ../rtl/src/snn_fpga_top.v
+    ../rtl/src/event_based_top.v
     }
 
 
@@ -30,15 +31,28 @@ add_files -fileset sim_1 ../rtl/tb/neuron_weights/
 # set_property top if_network_tb [get_filesets sim_1]
 set_property top if_network_test_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
+set_property top snn_fpga_top [current_fileset]
 
 update_compile_order -fileset sources_1
 update_compile_order -fileset sim_1
 
-set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
-set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets sim_1]
-
 # Load Constraints
 read_xdc ../xdc/snn_fpga_top.xdc
 
-launch_simulation
+set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
+set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets sim_1]
 
+reset_run synth_1
+launch_runs impl_1 -to_step write_bitstream -jobs 16
+
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/oshears/Documents/vt/research/code/verilog/snn_fpga/vivado/if_neuron_project/if_neuron_project.runs/impl_1/snn_fpga_top.bit} [get_hw_devices xc7z020_1]
+current_hw_device [get_hw_devices xc7z020_1]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7z020_1] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7z020_1]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7z020_1]
+set_property PROGRAM.FILE {/home/oshears/Documents/vt/research/code/verilog/snn_fpga/vivado/if_neuron_project/if_neuron_project.runs/impl_1/snn_fpga_top.bit} [get_hw_devices xc7z020_1]
+program_hw_devices [get_hw_devices xc7z020_1]
+refresh_hw_device [lindex [get_hw_devices xc7z020_1] 0]

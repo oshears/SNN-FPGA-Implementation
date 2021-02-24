@@ -7,23 +7,40 @@ module snn_fpga_top
     output wire spike_out
 );
 
-if_network 
+// if_network 
+// #(
+//     .THRESH(4),
+//     .RESET(0),
+//     .REFRAC(0),
+//     .WEIGHT_SIZE(32),
+//     .NUM_INPUTS(1),
+//     .NUM_OUTPUTS(1),
+//     .NUM_LAYERS(1),
+//     .NUM_HIDDEN_LAYER_NEURONS(1)
+// )
+// if_network
+// (
+//     .clk(clk),
+//     .rst(rst),
+//     .spike_in(spike_in),
+//     .spike_out(spike_out)
+// );
+
+
+if_neuron 
 #(
     .THRESH(4),
     .RESET(0),
-    .REFRAC(0),
     .WEIGHT_SIZE(32),
     .NUM_INPUTS(1),
-    .NUM_OUTPUTS(1),
-    .NUM_LAYERS(1),
-    .NUM_HIDDEN_LAYER_NEURONS(1)
+    .WEIGHT_FILENAME("neuron.txt")
 )
-if_network
+uut
 (
-    .clk(clk),
     .rst(rst),
-    .spike_in(spike_in),
-    .spike_out(spike_out)
+    .spike_out(spike_out),
+    .spike_in(spike_in)
 );
+
 
 endmodule
