@@ -25,7 +25,7 @@ if_network
 (
     .clk(clk),
     .rst(rst),
-    .spike_in(spike_in),
+    .spike_in(spike_in_i),
     .spike_out(spike_out)
 );
 
