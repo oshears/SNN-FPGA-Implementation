@@ -29,7 +29,6 @@ reg  [WEIGHT_SIZE - 1 : 0]  spike_accumulator_weights [NUM_INPUTS - 1 : 0];
 // initialize weight memory
 /*
 initial begin
-    /*
     weight_file = $fopen(WEIGHT_FILENAME,"r");
 
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin

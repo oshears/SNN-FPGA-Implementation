@@ -4,7 +4,7 @@ module snn_fpga_top
     input wire clk,
     input wire rst,
     input wire spike_in,
-    output wire spike_out
+    output reg spike_out
 );
 
 reg spike_in_i;
