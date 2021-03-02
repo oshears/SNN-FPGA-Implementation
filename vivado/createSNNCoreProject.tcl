@@ -7,9 +7,13 @@ create_project snn_core_project ./snn_core_project -part xc7z020clg484-1 -force
 set_property board_part em.avnet.com:zed:part0:1.4 [current_project]
 
 add_files {
+    ../rtl/src/lfsr.sv
     ../rtl/src/counter.sv 
     ../rtl/src/binary_spike_gen.sv 
+    ../rtl/src/spike_generator.sv
     ../rtl/src/spike_counter.sv 
+    ../rtl/src/if_layer_controller.sv 
+    ../rtl/src/spike_accumulator.sv 
     ../rtl/src/if_neuron.sv 
     ../rtl/src/if_layer.sv 
     ../rtl/src/if_network.sv 

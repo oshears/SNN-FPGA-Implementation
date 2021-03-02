@@ -35,9 +35,8 @@ snn_core_top
     .REFRAC(5),
     .WEIGHT_SIZE(32),
     .NUM_INPUTS(9),
-    .NUM_OUTPUTS(2),
     .NUM_LAYERS(1),
-    .NUM_HIDDEN_LAYER_NEURONS(3)
+    .NUM_HIDDEN_LAYER_NEURONS({3})
 )
 uut
 (
