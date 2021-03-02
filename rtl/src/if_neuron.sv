@@ -49,10 +49,12 @@ initial begin
 end
 */
 always @(posedge mem_clk) begin
-    if(mem_wen) begin
-        spike_accumulator_weights[mem_addr] <= mem_din;
+    if (mem_addr < NUM_INPUTS) begin
+        if(mem_wen) begin
+            spike_accumulator_weights[mem_addr] <= mem_din;
+        end
+        mem_dout <= spike_accumulator_weights[mem_addr];
     end
-    mem_dout <= spike_accumulator_weights[mem_addr];
 end
 
 // value counters for each input

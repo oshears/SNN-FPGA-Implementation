@@ -32,6 +32,7 @@ parameter C_S_AXI_ADDR_WIDTH = 9
 
     output [31:0] debug,
     output [31:0] ctrl,
+    output [31:0] sim_time,
 
     output [31 : 0] ext_mem_addr,
     output ext_mem_wen,
@@ -45,6 +46,9 @@ reg  debug_reg_addr_valid = 0;
 
 reg ctrl_reg_addr_valid = 0;
 reg [31:0] ctrl_reg = 0;
+
+reg sim_time_reg_addr_valid = 0;
+reg [31:0] sim_time_reg = 0;
 
 reg mem_cfg_reg_addr_valid = 0;
 reg [31:0] mem_cfg_reg = 0;
@@ -145,6 +149,7 @@ always @(
     local_address_valid, 
     debug_reg,
     ctrl_reg,
+    sim_time_reg,
     mem_cfg_reg,
     ext_mem_data_out
     )
@@ -157,8 +162,10 @@ begin
             4'h0000:
                 S_AXI_RDATA = ctrl_reg;
             4'h0004:
-                S_AXI_RDATA = mem_cfg_reg;
+                S_AXI_RDATA = sim_time_reg;
             4'h0008:
+                S_AXI_RDATA = mem_cfg_reg;
+            4'h000C:
                 S_AXI_RDATA = debug_reg;
             default:
                 S_AXI_RDATA = 32'b0;
@@ -192,6 +199,7 @@ begin
     ext_mem_addr_valid = 0;
     ctrl_reg_addr_valid = 0;
     mem_cfg_reg_addr_valid = 0;
+    sim_time_reg_addr_valid = 0;
     local_address_valid = 1;
 
     if (write_enable_registers)
@@ -200,8 +208,10 @@ begin
             16'h0000:
                 ctrl_reg_addr_valid = 1;
             16'h0004:
-                mem_cfg_reg_addr_valid = 1;
+                sim_time_reg_addr_valid = 1;
             16'h0008:
+                mem_cfg_reg_addr_valid = 1;
+            16'h000C:
                 debug_reg_addr_valid = 1;
             default:
             begin
@@ -252,11 +262,22 @@ always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
     end
 end
 
+always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
+    if (Local_Reset)
+        sim_time_reg = 0;
+    else begin
+        if(sim_time_reg_addr_valid)
+            sim_time_reg = S_AXI_WDATA;
+    end
+end
+
 assign ext_mem_addr = {mem_cfg_reg[31:8],local_address[7:0]};
 assign ext_mem_data_in = S_AXI_WDATA;
 assign ext_mem_wen = write_enable_registers && ext_mem_addr_valid && (local_address[15:8] > 0);
 assign ext_mem_sel = mem_cfg_reg[1:0];
 
 assign ctrl = ctrl_reg;
+
+assign sim_time = sim_time_reg;
 
 endmodule

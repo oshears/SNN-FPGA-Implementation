@@ -66,6 +66,8 @@ wire synpase_weight_mem_wen;
 wire [31 : 0] synpase_weight_mem_data_in;
 wire [31 : 0] synpase_weight_mem_data_out;
 
+wire [31:0] sim_time;
+
 assign spike_gen_mem_addr = ext_mem_addr;
 assign spike_gen_mem_wen = (ext_mem_sel == 2'h0) ? ext_mem_wen : 0;
 assign spike_gen_mem_data_in = ext_mem_data_in;
@@ -88,6 +90,8 @@ axi_cfg_regs
     .debug(debug),
     // Control Register Output
     .ctrl(ctrl),
+    // Simulation Time Register
+    .sim_time(sim_time),
     // Spike Generator RAM Signals
     .ext_mem_addr(ext_mem_addr),
     .ext_mem_wen(ext_mem_wen),

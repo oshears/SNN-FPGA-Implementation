@@ -10,7 +10,7 @@ localparam REFRAC = 0;
 localparam WEIGHT_SIZE = 9;
 localparam NUM_INPUTS = 9;
 localparam NUM_LAYERS = 2;
-localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [0 : NUM_LAYERS - 1]  = {3,2};
+localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0]  = {2,3};
 
 reg S_AXI_ACLK = 0;
 reg S_AXI_ARESETN = 0;
