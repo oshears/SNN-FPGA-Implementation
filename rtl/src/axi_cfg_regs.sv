@@ -6,55 +6,48 @@ parameter C_S_AXI_DATA_WIDTH = 32,
 parameter C_S_AXI_ADDR_WIDTH = 9 
 )
 (
-    S_AXI_ACLK,     
-    S_AXI_ARESETN,  
-    S_AXI_AWADDR,   
-    S_AXI_AWVALID,  
-    S_AXI_AWREADY,  
-    S_AXI_ARADDR,   
-    S_AXI_ARVALID,  
-    S_AXI_ARREADY,  
-    S_AXI_WDATA,    
-    S_AXI_WSTRB,    
-    S_AXI_WVALID,   
-    S_AXI_WREADY,   
-    S_AXI_RDATA,    
-    S_AXI_RRESP,    
-    S_AXI_RVALID,   
-    S_AXI_RREADY,   
-    S_AXI_BRESP,    
-    S_AXI_BVALID,   
-    S_AXI_BREADY,
-    debug
+    
+    input S_AXI_ACLK,   
+    input S_AXI_ARESETN,
+    input [C_S_AXI_ADDR_WIDTH - 1:0] S_AXI_AWADDR, 
+    input S_AXI_AWVALID,
+    input [C_S_AXI_ADDR_WIDTH - 1:0] S_AXI_ARADDR, 
+    input S_AXI_ARVALID,
+    input [C_S_AXI_DATA_WIDTH - 1:0] S_AXI_WDATA,  
+    input [(C_S_AXI_DATA_WIDTH/8)-1:0] S_AXI_WSTRB,  
+    input S_AXI_WVALID, 
+    input S_AXI_RREADY, 
+    input S_AXI_BREADY, 
+
+    input [31 : 0] ext_mem_data_out,
+
+    output reg S_AXI_AWREADY = 0, 
+    output reg S_AXI_ARREADY = 0, 
+    output reg S_AXI_WREADY = 0,  
+    output reg [C_S_AXI_DATA_WIDTH - 1:0] S_AXI_RDATA = 0,
+    output reg [1:0] S_AXI_RRESP = 0,
+    output reg S_AXI_RVALID = 0,  
+    output reg [1:0] S_AXI_BRESP = 0,
+    output reg S_AXI_BVALID = 0,    
+
+    output [31:0] debug,
+    output [31:0] ctrl,
+
+    output [31 : 0] ext_mem_addr,
+    output ext_mem_wen,
+    output [31 : 0] ext_mem_data_in,
+    output [1:0] ext_mem_sel
 );
-
-
-input S_AXI_ACLK;   
-input S_AXI_ARESETN;
-input [C_S_AXI_ADDR_WIDTH - 1:0] S_AXI_AWADDR; 
-input S_AXI_AWVALID;
-input [C_S_AXI_ADDR_WIDTH - 1:0] S_AXI_ARADDR; 
-input S_AXI_ARVALID;
-input [C_S_AXI_DATA_WIDTH - 1:0] S_AXI_WDATA;  
-input [(C_S_AXI_DATA_WIDTH/8 - 1):0] S_AXI_WSTRB;  
-input S_AXI_WVALID; 
-input S_AXI_RREADY; 
-input S_AXI_BREADY; 
-
-output reg S_AXI_AWREADY; 
-output reg S_AXI_ARREADY; 
-output reg S_AXI_WREADY;  
-output reg [C_S_AXI_DATA_WIDTH - 1:0] S_AXI_RDATA;
-output reg [1:0] S_AXI_RRESP;
-output reg S_AXI_RVALID;  
-output reg [1:0] S_AXI_BRESP;
-output reg S_AXI_BVALID;  
-
-output [31:0] debug;
 
 
 reg [31:0] debug_reg = 0;
 reg  debug_reg_addr_valid = 0;
+
+reg ctrl_reg_addr_valid = 0;
+reg [31:0] ctrl_reg = 0;
+
+reg mem_cfg_reg_addr_valid = 0;
+reg [31:0] mem_cfg_reg = 0;
 
 reg [2:0] current_state = 0;
 reg [2:0] next_state = 0;
@@ -66,6 +59,8 @@ wire [1:0] combined_S_AXI_AWVALID_S_AXI_ARVALID;
 
 reg write_enable_registers = 0;
 reg send_read_data_to_AXI = 0;
+
+reg ext_mem_addr_valid = 0;
 
 wire Local_Reset;
 
@@ -144,14 +139,26 @@ always @ (current_state, combined_S_AXI_AWVALID_S_AXI_ARVALID, S_AXI_ARVALID, S_
 end
 
 // send data to AXI RDATA
-always @(send_read_data_to_AXI, local_address, local_address_valid, debug_reg)
+always @(
+    send_read_data_to_AXI, 
+    local_address, 
+    local_address_valid, 
+    debug_reg,
+    ctrl_reg,
+    mem_cfg_reg,
+    ext_mem_data_out
+    )
 begin
     S_AXI_RDATA = 32'b0;
 
     if (local_address_valid == 1 && send_read_data_to_AXI == 1)
     begin
         case(local_address)
-            0:
+            4'h0000:
+                S_AXI_RDATA = ctrl_reg;
+            4'h0004:
+                S_AXI_RDATA = mem_cfg_reg;
+            4'h0008:
                 S_AXI_RDATA = debug_reg;
             default:
                 S_AXI_RDATA = 32'b0;
@@ -170,9 +177,9 @@ begin
         begin
             case (combined_S_AXI_AWVALID_S_AXI_ARVALID)
                 2'b10:
-                    local_address = S_AXI_AWADDR[7:0];
+                    local_address = S_AXI_AWADDR[15:0];
                 2'b01:     
-                    local_address = S_AXI_ARADDR[7:0];
+                    local_address = S_AXI_ARADDR[15:0];
             endcase
         end
     end
@@ -182,15 +189,25 @@ end
 always @(local_address,write_enable_registers)
 begin
     debug_reg_addr_valid = 0;
+    ext_mem_addr_valid = 0;
+    ctrl_reg_addr_valid = 0;
+    mem_cfg_reg_addr_valid = 0;
     local_address_valid = 1;
 
     if (write_enable_registers)
     begin
         case (local_address)
-            0:
+            16'h0000:
+                ctrl_reg_addr_valid = 1;
+            16'h0004:
+                mem_cfg_reg_addr_valid = 1;
+            16'h0008:
                 debug_reg_addr_valid = 1;
             default:
-                local_address_valid = 0;
+            begin
+                ext_mem_addr_valid = 1;
+                local_address_valid = 1;
+            end
         endcase
     end
 end
@@ -214,5 +231,32 @@ begin
             debug_reg = S_AXI_WDATA;
     end
 end
+
+always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
+    if (Local_Reset)
+        ctrl_reg = 0;
+    else begin
+        if(ctrl_reg_addr_valid)
+            ctrl_reg = S_AXI_WDATA;
+        else
+            ctrl_reg[0] = 0;
+    end
+end
+
+always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
+    if (Local_Reset)
+        mem_cfg_reg = 0;
+    else begin
+        if(mem_cfg_reg_addr_valid)
+            mem_cfg_reg = S_AXI_WDATA;
+    end
+end
+
+assign ext_mem_addr = {mem_cfg_reg[31:8],local_address[7:0]};
+assign ext_mem_data_in = S_AXI_WDATA;
+assign ext_mem_wen = write_enable_registers && ext_mem_addr_valid && (local_address[15:8] > 0);
+assign ext_mem_sel = mem_cfg_reg[1:0];
+
+assign ctrl = ctrl_reg;
 
 endmodule

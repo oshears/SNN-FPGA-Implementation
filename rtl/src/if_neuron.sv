@@ -5,12 +5,20 @@ module if_neuron
     parameter RESET=0,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    parameter WEIGHT_FILENAME="neuron.txt"
+    // parameter WEIGHT_FILENAME="neuron.txt"
+    parameter WEIGHT_ADDR_WIDTH=8
 )
 (
     input rst,
     input [NUM_INPUTS-1:0] spike_in,
-    output spike_out
+    output spike_out,
+
+    // weight memory access
+    input mem_clk,
+    input [WEIGHT_ADDR_WIDTH - 1 : 0] mem_addr,
+    input [WEIGHT_SIZE - 1 : 0] mem_din,
+    input mem_wen,
+    output reg [WEIGHT_SIZE - 1 : 0] mem_dout = 0
 );
 
 reg [WEIGHT_SIZE - 1:0] potential = 0;
@@ -40,6 +48,12 @@ initial begin
     $fclose(weight_file);
 end
 */
+always @(posedge mem_clk) begin
+    if(mem_wen) begin
+        spike_accumulator_weights[mem_addr] <= mem_din;
+    end
+    mem_dout <= spike_accumulator_weights[mem_addr];
+end
 
 // value counters for each input
 genvar i;
@@ -74,12 +88,12 @@ initial begin
     end
 end
 
-always @(posedge rst) begin
-    for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
-        spike_accumulator_weights[weight_index] = 32'b1;
-    end
-    threshold = THRESH;
-end
+// always @(posedge rst) begin
+//     for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
+//         spike_accumulator_weights[weight_index] = 32'b1;
+//     end
+//     threshold = THRESH;
+// end
 
 
 endmodule

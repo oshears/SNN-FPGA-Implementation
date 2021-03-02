@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module spike_generator
+module bernoulli_spike_generator
 # (
     NUM_SPIKES = 32,
     ADDR_WIDTH = 32,
@@ -43,7 +43,8 @@ end
 
 initial begin
     for (mem_iter = 0; mem_iter < ADDR_WIDTH; mem_iter = mem_iter + 1) begin
-        mem[mem_iter] = 32'h0FFF_FFFF;
+        mem[mem_iter] = 32'h7FFF_FFFF;
+        // mem[mem_iter] = {mem_iter[4:0],27'hFFF_FFFF};
     end
 end
 

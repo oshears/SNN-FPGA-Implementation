@@ -12,7 +12,13 @@ module if_layer
     input clk,
     input rst,
     input [NUM_INPUTS-1:0] spike_in,
-    output [NUM_NEURONS-1:0] spike_out
+    output [NUM_NEURONS-1:0] spike_out,
+
+    // weight memory access
+    input [27 : 0] mem_addr,
+    input [WEIGHT_SIZE - 1 : 0] mem_din,
+    input mem_wen,
+    output [WEIGHT_SIZE - 1 : 0] mem_dout
 );
 
 wire [NUM_NEURONS-1:0] spike_out_i;
@@ -20,8 +26,37 @@ wire [NUM_NEURONS-1:0] neuron_rst;
 
 assign spike_out = spike_out_i;
 
+
+wire [3:0] neuron_mem_sel;
+assign neuron_mem_sel = mem_addr[27:8];
+wire [7:0] mem_addr_i;
+assign mem_addr_i = mem_addr[7:0]; 
+
+wire [NUM_NEURONS - 1 : 0] neuron_wen;
+
+wire [WEIGHT_SIZE - 1 : 0] neuron_mem_dout [NUM_NEURONS - 1 : 0];
+
+reg [WEIGHT_SIZE - 1 : 0] mem_dout_i = 0;
+
+integer mem_dout_sel = 0;
+
+assign mem_dout = mem_dout_i;
+
+always_comb begin : mem_dout_block
+    mem_dout_i = neuron_mem_dout[0]; 
+    for (mem_dout_sel = 0; mem_dout_sel < NUM_NEURONS; mem_dout_sel = mem_dout_sel + 1) begin
+        if (neuron_mem_sel == mem_dout_sel) begin
+            mem_dout_i = neuron_mem_dout[mem_dout_sel];
+        end
+    end
+end
+
 genvar i;
 generate
+    for (i = 0; i < NUM_NEURONS; i = i + 1) begin
+        assign neuron_wen[i] = (neuron_mem_sel == i) ? mem_wen : 0;
+    end
+
     for (i=0; i<NUM_NEURONS; i=i+1) begin : output_neurons
     if_neuron 
     #(
@@ -35,7 +70,12 @@ generate
     if_neuron (
         .rst(neuron_rst[i]),
         .spike_in(spike_in),
-        .spike_out(spike_out_i[i])
+        .spike_out(spike_out_i[i]),
+        .mem_clk(clk),
+        .mem_addr(mem_addr_i),
+        .mem_din(mem_din),
+        .mem_wen(neuron_wen[i]),
+        .mem_dout(neuron_mem_dout[i])
     );
 end 
 endgenerate
