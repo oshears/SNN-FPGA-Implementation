@@ -4,7 +4,7 @@ module snn_core_top_tb;
 localparam C_S_AXI_ACLK_FREQ_HZ = 100000000;
 localparam C_S_AXI_DATA_WIDTH = 32;
 localparam C_S_AXI_ADDR_WIDTH = 16;
-localparam THRESH = 4;
+localparam THRESH = 256;
 localparam RESET = 0;
 localparam REFRAC = 0;
 localparam WEIGHT_SIZE = 9;

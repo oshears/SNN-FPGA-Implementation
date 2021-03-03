@@ -25,6 +25,7 @@ parameter NUM_OUTPUTS = 1
     input [31 : 0] spike_counter_out [NUM_OUTPUTS - 1 : 0],
 
     input network_done,
+    input network_busy,
 
     output reg S_AXI_AWREADY = 0, 
     output reg S_AXI_ARREADY = 0, 
@@ -252,10 +253,11 @@ always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
         ctrl_reg = 0;
     else begin
         if(ctrl_reg_addr_valid)
-            ctrl_reg = {S_AXI_WDATA[31:3],network_done,S_AXI_WDATA[1:0]};
+            ctrl_reg = {S_AXI_WDATA[31:4],network_done,network_busy,S_AXI_WDATA[1:0]};
         else begin
             ctrl_reg[0] = 0;
-            ctrl_reg[2] = network_done;
+            ctrl_reg[2] = network_busy;
+            ctrl_reg[3] = network_done;
         end
     end
 end

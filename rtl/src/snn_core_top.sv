@@ -106,6 +106,8 @@ axi_cfg_regs
     .spike_counter_out(spike_counter_out),
     // Network Done Signal
     .network_done(network_done),
+    // Network Busy Signal
+    .network_busy(network_en),
     // Spike Generator RAM Signals
     .ext_mem_addr(ext_mem_addr),
     .ext_mem_wen(ext_mem_wen),
