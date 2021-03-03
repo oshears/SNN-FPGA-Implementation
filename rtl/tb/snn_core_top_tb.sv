@@ -160,7 +160,7 @@ initial begin
         for (j = 0; j < NUM_HIDDEN_LAYER_NEURONS[i]; j = j + 1) begin
             num_synapses = (i == 0) ? NUM_INPUTS : NUM_HIDDEN_LAYER_NEURONS[i - 1];
             // Select Layer and Neuron
-            AXI_WRITE(32'h0000_0004, {i[3:0],j[19:0],8'h1});
+            AXI_WRITE(32'h0000_0008, {i[3:0],j[19:0],8'h1});
             for (k = 0; k < num_synapses; k = k + 1) begin
                 // Write Synapse Weight
                 AXI_WRITE(32'h0000_0100 + k, weight_counter);
@@ -169,6 +169,13 @@ initial begin
             end
         end
     end
+
+    /* Set Sim Time to 100 */
+    AXI_WRITE(32'h0000_0004, 100);
+
+    /* Reset Network */
+    AXI_WRITE(32'h0000_0000, 32'h1);
+
 
     WAIT(20);
 

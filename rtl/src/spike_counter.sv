@@ -8,7 +8,7 @@ module spike_counter
 (
     input wire [NUM_INPUTS-1:0] spike_in,
     input wire rst,
-    output wire [(NUM_INPUTS*COUNTER_SIZE) - 1 : 0] counter_out
+    output wire [COUNTER_SIZE - 1 : 0] counter_out [NUM_INPUTS - 1 : 0]
 );
 
 genvar i;
@@ -22,7 +22,7 @@ for (i=0; i<NUM_INPUTS; i=i+1) begin : spike_counters
         .clk(spike_in[i]),
         .rst(rst),
         .en(spike_in[i]),
-        .dout(counter_out[((i+1)*COUNTER_SIZE)-1:(i*COUNTER_SIZE)])
+        .dout(counter_out[i])
     );
 end 
 endgenerate

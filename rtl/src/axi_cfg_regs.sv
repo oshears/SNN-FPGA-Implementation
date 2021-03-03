@@ -3,7 +3,8 @@ module axi_cfg_regs
 #(
 parameter C_S_AXI_ACLK_FREQ_HZ = 100000000,
 parameter C_S_AXI_DATA_WIDTH = 32,
-parameter C_S_AXI_ADDR_WIDTH = 9 
+parameter C_S_AXI_ADDR_WIDTH = 9,
+parameter NUM_OUTPUTS = 1
 )
 (
     
@@ -20,6 +21,10 @@ parameter C_S_AXI_ADDR_WIDTH = 9
     input S_AXI_BREADY, 
 
     input [31 : 0] ext_mem_data_out,
+
+    input [31 : 0] spike_counter_out [NUM_OUTPUTS - 1 : 0],
+
+    input network_done,
 
     output reg S_AXI_AWREADY = 0, 
     output reg S_AXI_ARREADY = 0, 
@@ -159,13 +164,13 @@ begin
     if (local_address_valid == 1 && send_read_data_to_AXI == 1)
     begin
         case(local_address)
-            4'h0000:
+            4'h0000_0000:
                 S_AXI_RDATA = ctrl_reg;
-            4'h0004:
+            4'h0000_0004:
                 S_AXI_RDATA = sim_time_reg;
-            4'h0008:
+            4'h0000_0008:
                 S_AXI_RDATA = mem_cfg_reg;
-            4'h000C:
+            4'h0000_000C:
                 S_AXI_RDATA = debug_reg;
             default:
                 S_AXI_RDATA = 32'b0;
@@ -205,13 +210,13 @@ begin
     if (write_enable_registers)
     begin
         case (local_address)
-            16'h0000:
+            16'h0000_0000:
                 ctrl_reg_addr_valid = 1;
-            16'h0004:
+            16'h0000_0004:
                 sim_time_reg_addr_valid = 1;
-            16'h0008:
+            16'h0000_0008:
                 mem_cfg_reg_addr_valid = 1;
-            16'h000C:
+            16'h0000_000C:
                 debug_reg_addr_valid = 1;
             default:
             begin
@@ -247,9 +252,11 @@ always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
         ctrl_reg = 0;
     else begin
         if(ctrl_reg_addr_valid)
-            ctrl_reg = S_AXI_WDATA;
-        else
+            ctrl_reg = {S_AXI_WDATA[31:3],network_done,S_AXI_WDATA[1:0]};
+        else begin
             ctrl_reg[0] = 0;
+            ctrl_reg[2] = network_done;
+        end
     end
 end
 
@@ -264,7 +271,7 @@ end
 
 always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
     if (Local_Reset)
-        sim_time_reg = 0;
+        sim_time_reg = 100;
     else begin
         if(sim_time_reg_addr_valid)
             sim_time_reg = S_AXI_WDATA;

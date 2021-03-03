@@ -9,6 +9,7 @@ module bernoulli_spike_generator
 (
     input clk,
     input rst,
+    input en,
     input [ADDR_WIDTH - 1 : 0] mem_addr,
     input mem_wen,
     input [DATA_WIDTH - 1 : 0] mem_data_in,
@@ -28,7 +29,7 @@ genvar i;
 generate
     for(i = 0; i < NUM_SPIKES; i = i + 1) begin : spike_outputs
         
-        assign spikes[i] = (mem[i] > lfsr_out && count) ? 1 : 0;
+        assign spikes[i] = (mem[i] > lfsr_out && count && en) ? 1 : 0;
 
     end
 endgenerate

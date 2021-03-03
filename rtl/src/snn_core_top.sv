@@ -40,7 +40,6 @@ localparam NUM_OUTPUTS = NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1];
 
 
 wire rst;
-wire snn_rst;
 
 assign rst = ~S_AXI_ARESETN;
 
@@ -68,6 +67,14 @@ wire [31 : 0] synpase_weight_mem_data_out;
 
 wire [31:0] sim_time;
 
+wire [31 : 0] spike_counter_out [NUM_OUTPUTS - 1 : 0];
+
+wire network_rst;
+
+wire network_en;
+
+wire network_done;
+
 assign spike_gen_mem_addr = ext_mem_addr;
 assign spike_gen_mem_wen = (ext_mem_sel == 2'h0) ? ext_mem_wen : 0;
 assign spike_gen_mem_data_in = ext_mem_data_in;
@@ -78,11 +85,14 @@ assign synpase_weight_mem_data_in = ext_mem_data_in;
 
 assign ext_mem_data_out = (ext_mem_sel == 2'h0) ? spike_gen_mem_data_out : synpase_weight_mem_data_out;
 
+
+
 axi_cfg_regs 
 #(
     .C_S_AXI_ACLK_FREQ_HZ(C_S_AXI_ACLK_FREQ_HZ),
     .C_S_AXI_DATA_WIDTH(C_S_AXI_DATA_WIDTH),
-    .C_S_AXI_ADDR_WIDTH(C_S_AXI_ADDR_WIDTH)
+    .C_S_AXI_ADDR_WIDTH(C_S_AXI_ADDR_WIDTH),
+    .NUM_OUTPUTS(NUM_OUTPUTS)
 )
 axi_cfg_regs
 (
@@ -92,6 +102,10 @@ axi_cfg_regs
     .ctrl(ctrl),
     // Simulation Time Register
     .sim_time(sim_time),
+    // Spike Counter Registers
+    .spike_counter_out(spike_counter_out),
+    // Network Done Signal
+    .network_done(network_done),
     // Spike Generator RAM Signals
     .ext_mem_addr(ext_mem_addr),
     .ext_mem_wen(ext_mem_wen),
@@ -133,7 +147,7 @@ axi_cfg_regs
 //     .spike_out(spike_in)
 // );
 
-wire network_rst;
+
 assign network_rst = ctrl[0] || rst;
 
 if_network
@@ -158,17 +172,21 @@ if_network
     .mem_dout(synpase_weight_mem_data_out)
 );
 
+
+
+
 spike_counter
 #(
     .NUM_INPUTS(NUM_OUTPUTS),
-    .COUNTER_SIZE(4)
+    .COUNTER_SIZE(32)
 )
 spike_counter
 (
     .spike_in(spike_out),
-    .rst(snn_rst),
-    .counter_out()
+    .rst(network_rst),
+    .counter_out(spike_counter_out)
 );
+
 
 bernoulli_spike_generator
 # (
@@ -180,11 +198,29 @@ spike_generator
 (
     .clk(S_AXI_ACLK),
     .rst(rst),
+    .en(network_en),
     .mem_addr(spike_gen_mem_addr),
     .mem_wen(spike_gen_mem_wen),
     .mem_data_in(spike_gen_mem_data_in),
     .mem_data_out(spike_gen_mem_data_out),
     .spikes(spike_in)
 );
+
+wire [31:0] sim_time_cntr_out;
+
+counter 
+#(
+    .DATA_WIDTH(32)
+)
+sim_time_cntr (
+    .clk(S_AXI_ACLK),
+    .rst(network_rst),
+    .en(network_en),
+    .dout(sim_time_cntr_out)
+);
+
+assign network_en = (sim_time_cntr_out < sim_time);
+
+assign network_done = (sim_time_cntr_out == sim_time);
 
 endmodule
