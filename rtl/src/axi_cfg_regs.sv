@@ -175,7 +175,7 @@ begin
             4'h0000_000C:
                 S_AXI_RDATA = debug_reg;
             default:
-                S_AXI_RDATA = 32'b0;
+                S_AXI_RDATA = ext_mem_data_out;
         endcase;     
     end
 end
@@ -281,7 +281,8 @@ always @(posedge S_AXI_ACLK, posedge Local_Reset) begin
     end
 end
 
-assign ext_mem_addr = {mem_cfg_reg[31:8],local_address[7:0]};
+assign ext_mem_addr[31:8] = mem_cfg_reg[31:8];
+assign ext_mem_addr[7:0] = (combined_S_AXI_AWVALID_S_AXI_ARVALID[1]) ? S_AXI_AWADDR[7:0] : ( (combined_S_AXI_AWVALID_S_AXI_ARVALID[0]) ? S_AXI_ARADDR[7:0] : 8'h00);
 assign ext_mem_data_in = S_AXI_WDATA;
 assign ext_mem_wen = write_enable_registers && ext_mem_addr_valid && (local_address[15:8] > 0);
 assign ext_mem_sel = mem_cfg_reg[1:0];

@@ -136,7 +136,7 @@ assign spike_output_count_mem_data_in = (output_cntr_en) ? spike_counter_out[out
 assign ext_mem_data_out =   (ext_mem_sel == 2'b00) ? spike_gen_mem_data_out : ( 
                             (ext_mem_sel == 2'b01) ? synpase_weight_mem_data_out : (
                             (ext_mem_sel == 2'b10) ? spike_pattern_mem_data_out : (
-                            (ext_mem_sel == 2'b11) ? spike_pattern_mem_data_out : 0
+                            (ext_mem_sel == 2'b11) ? spike_output_count_mem_data_out : 0
                             )));
 
 
