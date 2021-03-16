@@ -11,6 +11,14 @@ localparam WEIGHT_SIZE = 9;
 localparam NUM_INPUTS = 9;
 localparam NUM_LAYERS = 2;
 localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0]  = {2,3};
+localparam MAX_TIMESTEPS_BITS = 4;
+localparam SPIKE_PATTERN_BATCH_ADDR_WIDTH = 1;
+
+localparam CTRL_REG = 16'h0000;
+localparam SIM_TIME_REG = 16'h0004;
+localparam MEM_CFG_REG = 16'h0008;
+localparam DEBUG_REG = 16'h000C;
+localparam EXT_MEM_OFFSET = 16'h0100;
 
 reg S_AXI_ACLK = 0;
 reg S_AXI_ARESETN = 0;
@@ -49,7 +57,9 @@ snn_core_top
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
     .NUM_LAYERS(NUM_LAYERS),
-    .NUM_HIDDEN_LAYER_NEURONS(NUM_HIDDEN_LAYER_NEURONS)
+    .NUM_HIDDEN_LAYER_NEURONS(NUM_HIDDEN_LAYER_NEURONS),
+    .MAX_TIMESTEPS_BITS(MAX_TIMESTEPS_BITS),
+    .SPIKE_PATTERN_BATCH_ADDR_WIDTH(SPIKE_PATTERN_BATCH_ADDR_WIDTH)
 )
 uut
 (
@@ -136,45 +146,61 @@ initial begin
     WAIT(1);
 
     /* Write Reg Tests */
-    AXI_WRITE(32'h0,32'hDEAD_BEEF);
+    AXI_WRITE(CTRL_REG,32'hDEAD_BEEF);
 
     /* Read Reg Tests */
-    AXI_READ(32'h0,32'hDEAD_BEEF);
+    AXI_READ(CTRL_REG,32'hDEAD_BEEF);
 
     /* SNN Simulation */
-    AXI_WRITE(32'h0,32'h0000_0006);
-    AXI_READ(32'h0,32'h0000_0006);
+    AXI_WRITE(CTRL_REG,32'h0000_0006);
+    AXI_READ(CTRL_REG,32'h0000_0006);
 
     /* Write Input Spike Gen Regs */
     for (i = 0; i < NUM_INPUTS; i = i + 1) begin
-        AXI_WRITE(32'h0000_0100 + i, (32'hFFFF_FFFF / NUM_INPUTS) * i);
+        AXI_WRITE(EXT_MEM_OFFSET + i, (32'hFFFF_FFFF / NUM_INPUTS) * i);
     end
 
     /* Write Synapse Memories */
 
     // Select Synapse Memories
-    AXI_WRITE(32'h0000_0004, 32'h1);
-
+    AXI_WRITE(MEM_CFG_REG, 32'h1);
     
     for (i = 0; i < NUM_LAYERS; i = i + 1) begin
         for (j = 0; j < NUM_HIDDEN_LAYER_NEURONS[i]; j = j + 1) begin
             num_synapses = (i == 0) ? NUM_INPUTS : NUM_HIDDEN_LAYER_NEURONS[i - 1];
             // Select Layer and Neuron
-            AXI_WRITE(32'h0000_0008, {i[3:0],j[19:0],8'h1});
+            AXI_WRITE(MEM_CFG_REG, {i[3:0],j[19:0],8'h1});
             for (k = 0; k < num_synapses; k = k + 1) begin
                 // Write Synapse Weight
-                AXI_WRITE(32'h0000_0100 + k, weight_counter);
+                AXI_WRITE(EXT_MEM_OFFSET + k, weight_counter);
 
                 weight_counter = weight_counter + 1;
             end
         end
     end
 
+    /* Write Spike Pattern */
+    // Select Spike Pattern Memory
+    AXI_WRITE(MEM_CFG_REG, 32'h2);
+    for (i = 0; i < 2**MAX_TIMESTEPS_BITS; i = i + 1) begin
+        // Loop through each input spike batch
+        for (j = 0; j < 2**SPIKE_PATTERN_BATCH_ADDR_WIDTH; j = j + 1) begin
+            // Select Spike Pattern Memory & Batch
+            AXI_WRITE(MEM_CFG_REG, {j[5:0],2'h2});
+            // Select the input spike batch
+            if(i % 2 == 0)
+                AXI_WRITE(EXT_MEM_OFFSET + i, 32'b0000_1111_1010_0101_0000_1111_1010_0101);
+            else
+                AXI_WRITE(EXT_MEM_OFFSET + i, 32'b1111_0000_0101_1010_1111_0000_0010_0001);
+        end
+    end
+
+
     /* Set Sim Time to 100 */
-    AXI_WRITE(32'h0000_0004, 100);
+    AXI_WRITE(SIM_TIME_REG, 2**MAX_TIMESTEPS_BITS);
 
     /* Reset Network */
-    AXI_WRITE(32'h0000_0000, 32'h1);
+    AXI_WRITE(CTRL_REG, 32'h1);
 
 
     WAIT(20);

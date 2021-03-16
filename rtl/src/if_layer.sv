@@ -6,7 +6,8 @@ module if_layer
     parameter REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    parameter NUM_NEURONS=1
+    parameter NUM_NEURONS=1,
+    parameter SINGLE_SPIKE=0
 )
 (
     input clk,
@@ -63,9 +64,9 @@ generate
         .THRESH(THRESH),
         .RESET(RESET),
         .WEIGHT_SIZE(WEIGHT_SIZE),
-        .NUM_INPUTS(NUM_INPUTS),
+        .NUM_INPUTS(NUM_INPUTS)
         //.WEIGHT_FILENAME({i+48,".txt"})
-        .WEIGHT_FILENAME("neuron.txt")
+        // .WEIGHT_FILENAME("neuron.txt")
     )
     if_neuron (
         .rst(neuron_rst[i]),

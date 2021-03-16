@@ -43,7 +43,8 @@ parameter NUM_OUTPUTS = 1
     output [31 : 0] ext_mem_addr,
     output ext_mem_wen,
     output [31 : 0] ext_mem_data_in,
-    output [1:0] ext_mem_sel
+    output [1:0] ext_mem_sel,
+    output [5:0] spike_pattern_batch_sel
 );
 
 
@@ -284,6 +285,7 @@ assign ext_mem_addr = {mem_cfg_reg[31:8],local_address[7:0]};
 assign ext_mem_data_in = S_AXI_WDATA;
 assign ext_mem_wen = write_enable_registers && ext_mem_addr_valid && (local_address[15:8] > 0);
 assign ext_mem_sel = mem_cfg_reg[1:0];
+assign spike_pattern_batch_sel = mem_cfg_reg[7:2];
 
 assign ctrl = ctrl_reg;
 

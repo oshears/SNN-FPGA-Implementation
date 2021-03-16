@@ -10,7 +10,10 @@ module snn_core_top
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,
-    parameter [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1}
+    parameter [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},
+    parameter MAX_TIMESTEPS_BITS = 8,
+    parameter SPIKE_PATTERN_BATCH_ADDR_WIDTH = 6,
+    parameter SPIKES_PER_BATCH = 32
 )
 (
     // axi_cfg_regs
@@ -38,7 +41,6 @@ module snn_core_top
 
 localparam NUM_OUTPUTS = NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1];
 
-
 wire rst;
 
 assign rst = ~S_AXI_ARESETN;
@@ -47,6 +49,8 @@ wire [31:0] debug;
 wire [31:0] ctrl;
 
 wire [NUM_INPUTS - 1:0] spike_in;
+wire [NUM_INPUTS - 1:0] bernoulli_spike_in;
+wire [NUM_INPUTS - 1:0] spike_pattern_spike_in;
 wire [NUM_OUTPUTS - 1:0] spike_out;
 
 wire [31 : 0] ext_mem_addr;
@@ -55,15 +59,15 @@ wire [31 : 0] ext_mem_data_in;
 wire [31 : 0] ext_mem_data_out;
 wire [1 : 0] ext_mem_sel;
 
-wire [31 : 0] spike_gen_mem_addr;
+wire [MAX_TIMESTEPS_BITS - 1 : 0] spike_gen_mem_addr;
 wire spike_gen_mem_wen;
 wire [31 : 0] spike_gen_mem_data_in;
 wire [31 : 0] spike_gen_mem_data_out;
 
 wire [31 : 0] synpase_weight_mem_addr;
 wire synpase_weight_mem_wen;
-wire [31 : 0] synpase_weight_mem_data_in;
-wire [31 : 0] synpase_weight_mem_data_out;
+wire [WEIGHT_SIZE - 1 : 0] synpase_weight_mem_data_in;
+wire [WEIGHT_SIZE - 1 : 0] synpase_weight_mem_data_out;
 
 wire [31:0] sim_time;
 
@@ -75,15 +79,36 @@ wire network_en;
 
 wire network_done;
 
+wire [MAX_TIMESTEPS_BITS - 1:0] spike_pattern_mem_addr;
+wire spike_pattern_mem_wen;
+wire [SPIKES_PER_BATCH - 1 :0] spike_pattern_mem_data_in;
+wire [SPIKES_PER_BATCH - 1 :0] spike_pattern_mem_data_out;
+wire [SPIKE_PATTERN_BATCH_ADDR_WIDTH - 1:0] spike_pattern_batch_sel;
+
+wire [MAX_TIMESTEPS_BITS - 1:0] spike_pattern_cntr;
+
+wire [31:0] sim_time_cntr_out;
+
+
+
+assign spike_in = ctrl[1] ? bernoulli_spike_in : spike_pattern_spike_in;
+
 assign spike_gen_mem_addr = ext_mem_addr;
-assign spike_gen_mem_wen = (ext_mem_sel == 2'h0) ? ext_mem_wen : 0;
+assign spike_gen_mem_wen = (ext_mem_sel == 2'b00) ? ext_mem_wen : 0;
 assign spike_gen_mem_data_in = ext_mem_data_in;
 
 assign synpase_weight_mem_addr = ext_mem_addr;
-assign synpase_weight_mem_wen = (ext_mem_sel == 2'h1) ? ext_mem_wen : 0;
+assign synpase_weight_mem_wen = (ext_mem_sel == 2'b01) ? ext_mem_wen : 0;
 assign synpase_weight_mem_data_in = ext_mem_data_in;
 
-assign ext_mem_data_out = (ext_mem_sel == 2'h0) ? spike_gen_mem_data_out : synpase_weight_mem_data_out;
+assign spike_pattern_mem_addr = (network_en) ? spike_pattern_cntr : ext_mem_addr;
+assign spike_pattern_mem_wen = (ext_mem_sel == 2'b10) ? ext_mem_wen : 0;
+assign spike_pattern_mem_data_in = ext_mem_data_in;
+
+assign ext_mem_data_out =   (ext_mem_sel == 2'b00) ? spike_gen_mem_data_out : ( 
+                            (ext_mem_sel == 2'b01) ? synpase_weight_mem_data_out : (
+                            spike_pattern_mem_data_out
+                            ));
 
 
 
@@ -114,6 +139,7 @@ axi_cfg_regs
     .ext_mem_data_in(ext_mem_data_in),
     .ext_mem_data_out(ext_mem_data_out),
     .ext_mem_sel(ext_mem_sel),
+    .spike_pattern_batch_sel(spike_pattern_batch_sel),
     //AXI Signals
     .S_AXI_ACLK(S_AXI_ACLK),     
     .S_AXI_ARESETN(S_AXI_ARESETN),  
@@ -205,10 +231,38 @@ spike_generator
     .mem_wen(spike_gen_mem_wen),
     .mem_data_in(spike_gen_mem_data_in),
     .mem_data_out(spike_gen_mem_data_out),
-    .spikes(spike_in)
+    .spikes(bernoulli_spike_in)
 );
 
-wire [31:0] sim_time_cntr_out;
+spike_pattern_mem
+# (
+    .NUM_SPIKES(NUM_INPUTS),
+    .TIMESTEP_ADDR_WIDTH(MAX_TIMESTEPS_BITS),
+    .SPIKE_PATTERN_BATCH_ADDR_WIDTH(SPIKE_PATTERN_BATCH_ADDR_WIDTH),
+    .SPIKES_PER_BATCH(32)
+)
+spike_pattern_mem
+(
+    .clk(S_AXI_ACLK),
+    .mem_addr(spike_pattern_mem_addr),
+    .mem_wen(spike_pattern_mem_wen),
+    .mem_data_in(spike_pattern_mem_data_in),
+    .mem_data_out(spike_pattern_mem_data_out),
+    .batch_sel(spike_pattern_batch_sel[SPIKE_PATTERN_BATCH_ADDR_WIDTH - 1 : 0]),
+    .spikes(spike_pattern_spike_in)
+);
+
+counter 
+#(
+    .DATA_WIDTH(MAX_TIMESTEPS_BITS)
+)
+spike_pattern_counter (
+    .clk(S_AXI_ACLK),
+    .rst(network_rst),
+    .en(network_en),
+    .dout(spike_pattern_cntr)
+);
+
 
 counter 
 #(
