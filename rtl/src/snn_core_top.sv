@@ -93,6 +93,15 @@ wire [31:0] sim_time_cntr_out;
 
 wire spike_en;
 
+wire outputs_done = output_cntr == NUM_OUTPUTS;
+wire output_cntr_rst;
+wire output_cntr_en;
+wire done;
+wire [31:0] output_cntr;
+
+assign network_en = (sim_time_cntr_out < sim_time);
+
+assign network_done = (sim_time_cntr_out == sim_time);
 
 assign spike_pattern_spike_in = spike_en ? spike_pattern_spike_in_i : 0;
 assign bernoulli_spike_in = spike_en ? bernoulli_spike_in_i : 0;
@@ -136,7 +145,7 @@ axi_cfg_regs
     // Spike Counter Registers
     .spike_counter_out(spike_counter_out),
     // Network Done Signal
-    .network_done(network_done),
+    .done(done),
     // Network Busy Signal
     .network_busy(network_en),
     // Spike Generator RAM Signals
@@ -292,8 +301,42 @@ sim_time_cntr (
     .dout(sim_time_cntr_out)
 );
 
-assign network_en = (sim_time_cntr_out < sim_time);
+counter 
+#(
+    .DATA_WIDTH(32)
+)
+output_cntr (
+    .clk(S_AXI_ACLK),
+    .rst(output_cntr_rst),
+    .en(output_cntr_en),
+    .dout(output_cntr)
+);
 
-assign network_done = (sim_time_cntr_out == sim_time);
+module snn_core_controller
+(
+.clk(S_AXI_ACLK),
+.rst(rst),
+.network_start(ctrl[0]),
+.network_done(network_done),
+.outputs_done(outputs_done),
+.output_cntr_rst(output_cntr_rst),
+.output_cntr_en(output_cntr_en),
+.done(done)
+);
+
+ram
+#(
+    .ADDR_WIDTH($clog(NUM_OUTPUTS))
+    .DATA_WDITH(32)
+)
+output_spike_counts_ram
+(
+    .clk(S_AXI_ACLK),
+    .wen(),
+    .addr(),
+    .din(),
+    .dout()
+)
+
 
 endmodule

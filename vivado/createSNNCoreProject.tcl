@@ -12,6 +12,7 @@ add_files {
     ../rtl/src/binary_spike_gen.sv 
     ../rtl/src/bernoulli_spike_generator.sv
     ../rtl/src/spike_pattern_mem.sv
+    ../rtl/src/snn_core_controller.sv
     ../rtl/src/spike_counter.sv 
     ../rtl/src/if_layer_controller.sv 
     ../rtl/src/spike_accumulator.sv 
