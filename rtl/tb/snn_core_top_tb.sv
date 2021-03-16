@@ -14,6 +14,8 @@ localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0]  = {2,3};
 localparam MAX_TIMESTEPS_BITS = 8;
 localparam SPIKE_PATTERN_BATCH_ADDR_WIDTH = 1;
 
+localparam NUM_OUTPUTS = NUM_HIDDEN_LAYER_NEURONS[0];
+
 localparam CTRL_REG = 16'h0000;
 localparam SIM_TIME_REG = 16'h0004;
 localparam MEM_CFG_REG = 16'h0008;
@@ -39,6 +41,7 @@ wire [1:0] S_AXI_RRESP;
 wire S_AXI_RVALID;  
 wire [1:0] S_AXI_BRESP;
 wire S_AXI_BVALID;  
+wire busy;
 
 integer i = 0;
 integer j = 0;
@@ -82,7 +85,8 @@ uut
     .S_AXI_RREADY(S_AXI_RREADY),   
     .S_AXI_BRESP(S_AXI_BRESP),    
     .S_AXI_BVALID(S_AXI_BVALID),   
-    .S_AXI_BREADY(S_AXI_BREADY)
+    .S_AXI_BREADY(S_AXI_BREADY),
+    .busy(busy)
 );
 
 initial begin
@@ -110,7 +114,7 @@ task AXI_WRITE( input [31:0] WRITE_ADDR, input [31:0] WRITE_DATA );
     end
 endtask
 
-task AXI_READ( input [31:0] READ_ADDR, input [31:0] EXPECT_DATA );
+task AXI_READ( input [31:0] READ_ADDR, input [31:0] EXPECT_DATA = 32'h0, input [31:0] MASK_DATA = 32'h0, input COMPARE=0);
     begin
         @(posedge S_AXI_ACLK);
         S_AXI_ARADDR = READ_ADDR;
@@ -119,7 +123,7 @@ task AXI_READ( input [31:0] READ_ADDR, input [31:0] EXPECT_DATA );
         @(posedge S_AXI_ACLK);
         S_AXI_ARVALID = 0;
         S_AXI_RREADY = 1'b1;
-        if (EXPECT_DATA == S_AXI_RDATA) 
+        if (((EXPECT_DATA | MASK_DATA) == (S_AXI_RDATA | MASK_DATA)) || ~COMPARE) 
             $display("%t: Read Data: %h",$time,S_AXI_RDATA);
         else 
             $display("%t: ERROR: %h != %h",$time,S_AXI_RDATA,EXPECT_DATA);
@@ -199,11 +203,18 @@ initial begin
     /* Set Sim Time to 100 */
     AXI_WRITE(SIM_TIME_REG, 2**MAX_TIMESTEPS_BITS);
 
-    /* Reset Network */
+    /* Start the Network */
     AXI_WRITE(CTRL_REG, 32'h1);
 
+    WAIT(1);
+    @(negedge busy);
 
-    WAIT(20);
+    // Read Outputs
+    // Select Spike Counter Memory
+    AXI_WRITE(MEM_CFG_REG, 32'h3);
+    for (i = 0; i < NUM_OUTPUTS; i = i + 1) begin
+        AXI_READ(EXT_MEM_OFFSET + i);
+    end
 
     $finish;
 

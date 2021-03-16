@@ -13,7 +13,8 @@ module snn_core_top
     parameter [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},
     parameter MAX_TIMESTEPS_BITS = 8,
     parameter SPIKE_PATTERN_BATCH_ADDR_WIDTH = 6,
-    parameter SPIKES_PER_BATCH = 32
+    parameter SPIKES_PER_BATCH = 32,
+    parameter OUTPUT_SPIKE_ADDR_BITS = 4
 )
 (
     // axi_cfg_regs
@@ -36,7 +37,8 @@ module snn_core_top
     output [1:0] S_AXI_RRESP,
     output S_AXI_RVALID,  
     output [1:0] S_AXI_BRESP,
-    output S_AXI_BVALID    
+    output S_AXI_BVALID,
+    output busy
 );
 
 localparam NUM_OUTPUTS = NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1];
@@ -93,11 +95,18 @@ wire [31:0] sim_time_cntr_out;
 
 wire spike_en;
 
-wire outputs_done = output_cntr == NUM_OUTPUTS;
+wire outputs_done = (output_cntr == NUM_OUTPUTS - 1);
 wire output_cntr_rst;
 wire output_cntr_en;
 wire done;
-wire [31:0] output_cntr;
+wire [OUTPUT_SPIKE_ADDR_BITS - 1:0] output_cntr;
+
+wire [OUTPUT_SPIKE_ADDR_BITS - 1 : 0] spike_output_count_mem_addr;
+wire [OUTPUT_SPIKE_ADDR_BITS - 1 : 0] spike_output_count_mem_wen;
+wire [31 : 0] spike_output_count_mem_data_in;
+wire [31 : 0] spike_output_count_mem_data_out;
+
+assign busy = ~done;
 
 assign network_en = (sim_time_cntr_out < sim_time);
 
@@ -120,10 +129,15 @@ assign spike_pattern_mem_addr = (network_en) ? spike_pattern_cntr : ( (ext_mem_s
 assign spike_pattern_mem_wen = (ext_mem_sel == 2'b10) ? ext_mem_wen : 0;
 assign spike_pattern_mem_data_in = ext_mem_data_in;
 
+assign spike_output_count_mem_addr = (output_cntr_en) ? output_cntr : ( (ext_mem_sel == 2'b11) ? ext_mem_addr[OUTPUT_SPIKE_ADDR_BITS - 1 : 0] : 0) ;
+assign spike_output_count_mem_wen = (output_cntr_en) ? output_cntr_en : ( (ext_mem_sel == 2'b11) ? ext_mem_wen : 0 );
+assign spike_output_count_mem_data_in = (output_cntr_en) ? spike_counter_out[output_cntr] : ext_mem_data_in;
+
 assign ext_mem_data_out =   (ext_mem_sel == 2'b00) ? spike_gen_mem_data_out : ( 
                             (ext_mem_sel == 2'b01) ? synpase_weight_mem_data_out : (
-                            spike_pattern_mem_data_out
-                            ));
+                            (ext_mem_sel == 2'b10) ? spike_pattern_mem_data_out : (
+                            (ext_mem_sel == 2'b11) ? spike_pattern_mem_data_out : 0
+                            )));
 
 
 
@@ -303,16 +317,17 @@ sim_time_cntr (
 
 counter 
 #(
-    .DATA_WIDTH(32)
+    .DATA_WIDTH(OUTPUT_SPIKE_ADDR_BITS)
 )
-output_cntr (
+output_counter 
+(
     .clk(S_AXI_ACLK),
     .rst(output_cntr_rst),
     .en(output_cntr_en),
     .dout(output_cntr)
 );
 
-module snn_core_controller
+snn_core_controller snn_core_controller
 (
 .clk(S_AXI_ACLK),
 .rst(rst),
@@ -326,17 +341,17 @@ module snn_core_controller
 
 ram
 #(
-    .ADDR_WIDTH($clog(NUM_OUTPUTS))
+    .ADDR_WIDTH(OUTPUT_SPIKE_ADDR_BITS),
     .DATA_WDITH(32)
 )
 output_spike_counts_ram
 (
     .clk(S_AXI_ACLK),
-    .wen(),
-    .addr(),
-    .din(),
-    .dout()
-)
+    .wen(spike_output_count_mem_wen),
+    .addr(spike_output_count_mem_addr),
+    .din(spike_output_count_mem_data_in),
+    .dout(spike_output_count_mem_data_out)
+);
 
 
 endmodule

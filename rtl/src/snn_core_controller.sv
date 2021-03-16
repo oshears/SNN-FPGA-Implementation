@@ -30,9 +30,11 @@ end
 always @(
     network_start,
     network_done,
-    outputs_done
+    outputs_done,
+    current_state
     )
-
+    begin
+    
     output_cntr_en = 0;
     output_cntr_rst = 0;
     done = 0;
@@ -52,7 +54,7 @@ always @(
             output_cntr_rst = 1;
         end
     end
-    OUTPUT_STORE_STATE
+    OUTPUT_STORE_STATE:
     begin
         done = 0;
         output_cntr_en = 1;
@@ -68,6 +70,6 @@ always @(
     end
 
     endcase
-
+end
 
 endmodule
