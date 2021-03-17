@@ -23,7 +23,7 @@ reg count = 0;
 
 wire [DATA_WIDTH - 1 : 0] lfsr_out;
 
-reg [DATA_WIDTH - 1 : 0] mem [ADDR_WIDTH - 1 : 0];
+reg [DATA_WIDTH - 1 : 0] mem [2**$clog2(NUM_SPIKES) - 1 : 0];
 
 genvar i;
 generate

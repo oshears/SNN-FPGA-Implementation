@@ -7,7 +7,9 @@ module if_layer
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_NEURONS=1,
-    parameter SINGLE_SPIKE=0
+    parameter SINGLE_SPIKE=0,
+    parameter LAYER_ADDR_WIDTH = 28,
+    parameter WEIGHT_ADDR_WIDTH = 10
 )
 (
     input clk,
@@ -16,7 +18,7 @@ module if_layer
     output [NUM_NEURONS-1:0] spike_out,
 
     // weight memory access
-    input [27 : 0] mem_addr,
+    input [LAYER_ADDR_WIDTH - 1 : 0] mem_addr,
     input [WEIGHT_SIZE - 1 : 0] mem_din,
     input mem_wen,
     output [WEIGHT_SIZE - 1 : 0] mem_dout
@@ -29,9 +31,9 @@ assign spike_out = spike_out_i;
 
 
 wire [3:0] neuron_mem_sel;
-assign neuron_mem_sel = mem_addr[27:8];
-wire [7:0] mem_addr_i;
-assign mem_addr_i = mem_addr[7:0]; 
+assign neuron_mem_sel = mem_addr[LAYER_ADDR_WIDTH - 1:WEIGHT_ADDR_WIDTH];
+wire [WEIGHT_ADDR_WIDTH - 1 :0] mem_addr_i;
+assign mem_addr_i = mem_addr[WEIGHT_ADDR_WIDTH - 1 : 0]; 
 
 wire [NUM_NEURONS - 1 : 0] neuron_wen;
 
@@ -64,7 +66,8 @@ generate
         .THRESH(THRESH),
         .RESET(RESET),
         .WEIGHT_SIZE(WEIGHT_SIZE),
-        .NUM_INPUTS(NUM_INPUTS)
+        .NUM_INPUTS(NUM_INPUTS),
+        .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH)
         //.WEIGHT_FILENAME({i+48,".txt"})
         // .WEIGHT_FILENAME("neuron.txt")
     )

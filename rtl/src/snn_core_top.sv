@@ -102,7 +102,7 @@ wire done;
 wire [OUTPUT_SPIKE_ADDR_BITS - 1:0] output_cntr;
 
 wire [OUTPUT_SPIKE_ADDR_BITS - 1 : 0] spike_output_count_mem_addr;
-wire [OUTPUT_SPIKE_ADDR_BITS - 1 : 0] spike_output_count_mem_wen;
+wire spike_output_count_mem_wen;
 wire [31 : 0] spike_output_count_mem_data_in;
 wire [31 : 0] spike_output_count_mem_data_out;
 
@@ -342,7 +342,7 @@ snn_core_controller snn_core_controller
 ram
 #(
     .ADDR_WIDTH(OUTPUT_SPIKE_ADDR_BITS),
-    .DATA_WDITH(32)
+    .DATA_WIDTH(32)
 )
 output_spike_counts_ram
 (

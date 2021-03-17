@@ -27,8 +27,8 @@ add_files {
 
 
 move_files -fileset sim_1 [get_files  ../rtl/tb/snn_core_top_tb.sv]
-add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
-add_files -fileset sim_1 ../rtl/tb/neuron_weights/
+# add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
+# add_files -fileset sim_1 ../rtl/tb/neuron_weights/
 
 set_property top snn_core_top_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
@@ -40,5 +40,7 @@ set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_f
 set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets sim_1]
 
 launch_simulation
+#launch_sim
+#close_sim -force
 
 add_wave {{/snn_core_top_tb/uut}} 

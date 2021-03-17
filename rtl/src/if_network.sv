@@ -7,7 +7,9 @@ module if_network
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,
-    parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1}
+    parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},
+    parameter LAYER_ADDR_WIDTH = 28,
+    parameter WEIGHT_ADDR_WIDTH = 10
 )
 (
     input clk,
@@ -25,8 +27,8 @@ module if_network
 
 wire [3:0] layer_mem_sel;
 assign layer_mem_sel = mem_addr[31:28];
-wire [27:0] mem_addr_i;
-assign mem_addr_i = mem_addr[27:0]; 
+wire [LAYER_ADDR_WIDTH-1:0] mem_addr_i;
+assign mem_addr_i = mem_addr[LAYER_ADDR_WIDTH-1:0]; 
 
 genvar i;
 generate 
@@ -40,7 +42,9 @@ if (NUM_LAYERS == 1) begin
         .REFRAC(REFRAC),
         .WEIGHT_SIZE(WEIGHT_SIZE),
         .NUM_INPUTS(NUM_INPUTS),
-        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
+        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
+        .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+        .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
     )
     hidden_layer_in (
         .clk(clk),
@@ -76,7 +80,9 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
+    .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
 )
 hidden_layer_in (
     .clk(clk),
@@ -97,7 +103,9 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[0]),
-    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[1])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[1]),
+    .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
 )
 hidden_layer_out (
     .clk(clk),
@@ -145,7 +153,9 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_INPUTS),
-    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
+    .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
 )
 hidden_layer_in (
     .clk(clk),
@@ -171,7 +181,9 @@ for (i=0; i<NUM_LAYERS - 2; i=i+1) begin : hidden_layers
         .REFRAC(REFRAC),
         .WEIGHT_SIZE(WEIGHT_SIZE),
         .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[i]),
-        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[i + 1])
+        .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[i + 1]),
+        .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+        .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
     )
     hidden_layer (
         .clk(clk),
@@ -193,7 +205,9 @@ if_layer
     .REFRAC(REFRAC),
     .WEIGHT_SIZE(WEIGHT_SIZE),
     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 2]),
-    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1])
+    .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1]),
+    .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
+    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
 )
 hidden_layer_out (
     .clk(clk),
