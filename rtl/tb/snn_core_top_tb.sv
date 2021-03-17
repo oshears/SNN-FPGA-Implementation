@@ -9,7 +9,7 @@ localparam C_S_AXI_ADDR_WIDTH = 16;
 localparam THRESH = 256;
 localparam RESET = 0;
 localparam REFRAC = 0;
-localparam WEIGHT_SIZE = 9;
+localparam WEIGHT_SIZE = 32;
 localparam NUM_INPUTS = 784;
 localparam NUM_LAYERS = 1;
 localparam [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0]  = {100};
@@ -200,16 +200,16 @@ initial begin
     //         end
     //     end
     // end
-    for (i = 0; i < NUM_HIDDEN_LAYER_NEURONS[0]; i++) begin
+    for (i = 0; i < NUM_OUTPUTS; i++) begin
         weight_file_num_str.itoa(i);
         input_weight_file = $fopen({"/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/neuron_weights/",weight_file_num_str,".txt"},"r");
         weight_cntr = 0;
-        AXI_WRITE(MEM_CFG_REG, {4'b0000,i[19:0],8'h1});
         while(!$feof(input_weight_file)) begin
             $fgets(line,input_weight_file);
             weight_value = line.atohex();
-            $display("Neuron: %d, Synapse: %d, Weight: %h",i,weight_cntr,weight_value);
-            AXI_WRITE(EXT_MEM_OFFSET + k, weight_value);
+            $display("Neuron: %d, Synapse: %d, Weight: %h",i[9:0],weight_cntr,weight_value);
+            AXI_WRITE(MEM_CFG_REG, {4'b0000,i[17:0],weight_cntr[9:8],8'h1});
+            AXI_WRITE(EXT_MEM_OFFSET + weight_cntr[7:0], weight_value);
             weight_cntr++;
         end
     end
@@ -246,9 +246,11 @@ initial begin
         $display("Spikes @ %d: %b",timestep_cntr,spike_pattern[timestep_cntr]);
 
         // Loop through each input spike batch
+        // DEBUG, select only the first batch
         AXI_WRITE(MEM_CFG_REG, {6'b000000,2'h2});
         // Select the input spike batch
-        AXI_WRITE(EXT_MEM_OFFSET + i, spike_pattern[timestep_cntr][31:0]);
+        // DEBUG: write only the first batch
+        AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][31:0]);
 
         timestep_cntr++;
     end

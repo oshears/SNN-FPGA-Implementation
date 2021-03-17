@@ -8,7 +8,7 @@ module if_layer
     parameter NUM_INPUTS=4,
     parameter NUM_NEURONS=1,
     parameter SINGLE_SPIKE=0,
-    parameter LAYER_ADDR_WIDTH = 28,
+    parameter NEURON_ADDR_WIDTH = 28,
     parameter WEIGHT_ADDR_WIDTH = 10
 )
 (
@@ -18,7 +18,7 @@ module if_layer
     output [NUM_NEURONS-1:0] spike_out,
 
     // weight memory access
-    input [LAYER_ADDR_WIDTH - 1 : 0] mem_addr,
+    input [NEURON_ADDR_WIDTH - 1 : 0] mem_addr,
     input [WEIGHT_SIZE - 1 : 0] mem_din,
     input mem_wen,
     output [WEIGHT_SIZE - 1 : 0] mem_dout
@@ -30,8 +30,8 @@ wire [NUM_NEURONS-1:0] neuron_rst;
 assign spike_out = spike_out_i;
 
 
-wire [3:0] neuron_mem_sel;
-assign neuron_mem_sel = mem_addr[LAYER_ADDR_WIDTH - 1:WEIGHT_ADDR_WIDTH];
+wire [NEURON_ADDR_WIDTH - WEIGHT_ADDR_WIDTH:0] neuron_mem_sel;
+assign neuron_mem_sel = mem_addr[NEURON_ADDR_WIDTH - 1:WEIGHT_ADDR_WIDTH];
 wire [WEIGHT_ADDR_WIDTH - 1 :0] mem_addr_i;
 assign mem_addr_i = mem_addr[WEIGHT_ADDR_WIDTH - 1 : 0]; 
 

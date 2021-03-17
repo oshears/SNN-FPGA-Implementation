@@ -8,7 +8,8 @@ module if_network
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,
     parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},
-    parameter LAYER_ADDR_WIDTH = 28,
+    parameter LAYER_ADDR_WIDTH = 32,
+    parameter NEURON_ADDR_WIDTH = 28,
     parameter WEIGHT_ADDR_WIDTH = 10
 )
 (
@@ -18,17 +19,17 @@ module if_network
     output [NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1] - 1 : 0] spike_out,
 
     // weight memory access
-    input [31 : 0] mem_addr,
+    input [LAYER_ADDR_WIDTH - 1 : 0] mem_addr,
     input [WEIGHT_SIZE - 1 : 0] mem_din,
     input mem_wen,
     output [WEIGHT_SIZE - 1 : 0] mem_dout
 );
 
 
-wire [3:0] layer_mem_sel;
-assign layer_mem_sel = mem_addr[31:28];
-wire [LAYER_ADDR_WIDTH-1:0] mem_addr_i;
-assign mem_addr_i = mem_addr[LAYER_ADDR_WIDTH-1:0]; 
+wire [LAYER_ADDR_WIDTH - NEURON_ADDR_WIDTH - WEIGHT_ADDR_WIDTH:0] layer_mem_sel;
+assign layer_mem_sel = mem_addr[LAYER_ADDR_WIDTH - 1:NEURON_ADDR_WIDTH];
+wire [NEURON_ADDR_WIDTH-1:0] mem_addr_i;
+assign mem_addr_i = mem_addr[NEURON_ADDR_WIDTH-1:0]; 
 
 genvar i;
 generate 
@@ -44,7 +45,7 @@ if (NUM_LAYERS == 1) begin
         .NUM_INPUTS(NUM_INPUTS),
         .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
         .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-        .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+        .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
     )
     hidden_layer_in (
         .clk(clk),
@@ -82,7 +83,7 @@ if_layer
     .NUM_INPUTS(NUM_INPUTS),
     .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
     .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+    .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
 )
 hidden_layer_in (
     .clk(clk),
@@ -105,7 +106,7 @@ if_layer
     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[0]),
     .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[1]),
     .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+    .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
 )
 hidden_layer_out (
     .clk(clk),
@@ -155,7 +156,7 @@ if_layer
     .NUM_INPUTS(NUM_INPUTS),
     .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[0]),
     .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+    .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
 )
 hidden_layer_in (
     .clk(clk),
@@ -183,7 +184,7 @@ for (i=0; i<NUM_LAYERS - 2; i=i+1) begin : hidden_layers
         .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[i]),
         .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[i + 1]),
         .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-        .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+        .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
     )
     hidden_layer (
         .clk(clk),
@@ -207,7 +208,7 @@ if_layer
     .NUM_INPUTS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 2]),
     .NUM_NEURONS(NUM_HIDDEN_LAYER_NEURONS[NUM_LAYERS - 1]),
     .WEIGHT_ADDR_WIDTH(WEIGHT_ADDR_WIDTH),
-    .LAYER_ADDR_WIDTH(LAYER_ADDR_WIDTH)
+    .NEURON_ADDR_WIDTH(NEURON_ADDR_WIDTH)
 )
 hidden_layer_out (
     .clk(clk),
