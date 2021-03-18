@@ -106,9 +106,11 @@ wire spike_output_count_mem_wen;
 wire [31 : 0] spike_output_count_mem_data_in;
 wire [31 : 0] spike_output_count_mem_data_out;
 
+wire sim_time_done;
+
 assign busy = ~done;
 
-assign network_en = (sim_time_cntr_out < sim_time);
+assign sim_time_done = (sim_time_cntr_out < sim_time);
 
 assign network_done = (sim_time_cntr_out == sim_time);
 
@@ -339,7 +341,9 @@ snn_core_controller snn_core_controller
 .outputs_done(outputs_done),
 .output_cntr_rst(output_cntr_rst),
 .output_cntr_en(output_cntr_en),
-.done(done)
+.done(done),
+.sim_time_done(sim_time_done),
+.network_en(network_en)
 );
 
 ram

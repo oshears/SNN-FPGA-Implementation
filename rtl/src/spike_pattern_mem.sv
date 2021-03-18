@@ -22,29 +22,35 @@ module spike_pattern_mem
 
 reg mem [2**TIMESTEP_ADDR_WIDTH - 1:0][NUM_SPIKES - 1 : 0];
 
-integer batch_index = 0;
-integer spike_index = 0;
-integer timestep = 0;
 
 always @(posedge clk)
 begin
+    integer batch_index = 0;
+    integer spike_index = 0;
+    integer data_in_index = 0;
+
+
     mem_data_out = 0;
     spikes = 0;
 
     if (mem_wen) begin
-        for(batch_index = 0; batch_index < SPIKE_PATTERN_BATCH_ADDR_WIDTH; batch_index = batch_index + 1) begin
+        for(batch_index = 0; batch_index < 2**SPIKE_PATTERN_BATCH_ADDR_WIDTH; batch_index = batch_index + 1) begin
             if (batch_sel == batch_index) begin
-                for(spike_index = batch_index * SPIKES_PER_BATCH; spike_index < (batch_index + 1) * SPIKES_PER_BATCH && spike_index < NUM_SPIKES; spike_index = spike_index + 1) begin
-                    mem[mem_addr][spike_index] <= mem_data_in[spike_index];
+                data_in_index = 0;
+                for(spike_index = batch_index * SPIKES_PER_BATCH; spike_index < (batch_index + 1) * SPIKES_PER_BATCH && spike_index < NUM_SPIKES; spike_index++) begin
+                    mem[mem_addr][spike_index] <= mem_data_in[data_in_index];
+                    data_in_index++;                    
                 end
             end
         end
     end
     
-    for(batch_index = 0; batch_index < SPIKE_PATTERN_BATCH_ADDR_WIDTH; batch_index = batch_index + 1) begin
+    for(batch_index = 0; batch_index < 2**SPIKE_PATTERN_BATCH_ADDR_WIDTH; batch_index = batch_index + 1) begin
         if (batch_sel == batch_index) begin
-            for(spike_index = batch_index * SPIKES_PER_BATCH; spike_index < (batch_index + 1) * SPIKES_PER_BATCH && spike_index < NUM_SPIKES; spike_index = spike_index + 1) begin
-                mem_data_out[spike_index] <= mem[mem_addr][spike_index];
+            data_in_index = 0;
+            for(spike_index = batch_index * SPIKES_PER_BATCH; spike_index < (batch_index + 1) * SPIKES_PER_BATCH && spike_index < NUM_SPIKES; spike_index++) begin
+                mem_data_out[data_in_index] <= mem[mem_addr][spike_index];
+                data_in_index++;
             end
         end
     end
@@ -57,8 +63,11 @@ begin
 end
 
 initial begin
-    for (timestep = 0; timestep < 2**TIMESTEP_ADDR_WIDTH; timestep = timestep + 1) begin
-        for(spike_index = 0; spike_index < NUM_SPIKES; spike_index = spike_index + 1) begin
+    integer timestep = 0;
+    integer spike_index = 0;
+
+    for (timestep = 0; timestep < 2**TIMESTEP_ADDR_WIDTH; timestep++) begin
+        for(spike_index = 0; spike_index < NUM_SPIKES; spike_index++) begin
             mem[timestep][spike_index] = 0;
         end
     end

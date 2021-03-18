@@ -64,7 +64,7 @@ reg [2:0] current_state = 0;
 reg [2:0] next_state = 0;
 
 reg [15:0] local_address = 0;
-reg local_address_valid = 0;
+reg local_address_valid = 1;
 
 wire [1:0] combined_S_AXI_AWVALID_S_AXI_ARVALID;
 
@@ -223,7 +223,6 @@ begin
             default:
             begin
                 ext_mem_addr_valid = 1;
-                local_address_valid = 1;
             end
         endcase
     end

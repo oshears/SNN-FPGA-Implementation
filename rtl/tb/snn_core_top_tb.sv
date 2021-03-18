@@ -26,6 +26,9 @@ localparam MEM_CFG_REG = 16'h0008;
 localparam DEBUG_REG = 16'h000C;
 localparam EXT_MEM_OFFSET = 16'h0100;
 
+localparam real NUM_INPUTS_REAL = NUM_INPUTS;
+localparam integer NUM_INPUT_SPIKE_BATCHES = $ceil(NUM_INPUTS_REAL / SPIKES_PER_BATCH);
+
 reg S_AXI_ACLK = 0;
 reg S_AXI_ARESETN = 0;
 reg [C_S_AXI_ADDR_WIDTH - 1 : 0] S_AXI_AWADDR = 0; 
@@ -157,7 +160,7 @@ initial begin
     integer input_cntr;
     integer timestep_cntr;
     string spike_value_str;
-    bit[NUM_INPUTS - 1 : 0] spike_pattern [2**MAX_TIMESTEPS_BITS : 1];
+    bit[NUM_INPUT_SPIKE_BATCHES * SPIKES_PER_BATCH - 1 : 0] spike_pattern [2**MAX_TIMESTEPS_BITS : 1];
     string line;
 
     WAIT(10);
@@ -167,14 +170,14 @@ initial begin
     WAIT(1);
 
     /* Write Reg Tests */
-    AXI_WRITE(CTRL_REG,32'hDEAD_BEEF);
+    // AXI_WRITE(CTRL_REG,32'hDEAD_BEEE);
 
     /* Read Reg Tests */
-    AXI_READ(CTRL_REG,32'hDEAD_BEEF);
+    // AXI_READ(CTRL_REG,32'hDEAD_BEEE);
 
     /* SNN Simulation */
-    AXI_WRITE(CTRL_REG,32'h0000_0006);
-    AXI_READ(CTRL_REG,32'h0000_0006);
+    // AXI_WRITE(CTRL_REG,32'h0000_0006);
+    // AXI_READ(CTRL_REG,32'h0000_0006);
 
     /* Write Input Spike Gen Regs */
     // for (i = 0; i < NUM_INPUTS; i = i + 1) begin
@@ -186,20 +189,6 @@ initial begin
     // Select Synapse Memories
     AXI_WRITE(MEM_CFG_REG, 32'h1);
     
-    // for (i = 0; i < NUM_LAYERS; i = i + 1) begin
-    //     for (j = 0; j < NUM_HIDDEN_LAYER_NEURONS[i]; j = j + 1) begin
-    //         num_synapses = (i == 0) ? NUM_INPUTS : NUM_HIDDEN_LAYER_NEURONS[i - 1];
-    //         // Select Layer and Neuron
-    //         AXI_WRITE(MEM_CFG_REG, {i[3:0],j[19:0],8'h1});
-    //         for (k = 0; k < num_synapses; k = k + 1) begin
-    //             $display("Writing Synapse Weight for Layer: %d, Neuron: %d, Synapse: %d",i,j,k);
-    //             // Write Synapse Weight
-    //             AXI_WRITE(EXT_MEM_OFFSET + k, weight_counter);
-
-    //             weight_counter = weight_counter + 1;
-    //         end
-    //     end
-    // end
     for (i = 0; i < NUM_OUTPUTS; i++) begin
         weight_file_num_str.itoa(i);
         input_weight_file = $fopen({"/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/neuron_weights/",weight_file_num_str,".txt"},"r");
@@ -217,25 +206,13 @@ initial begin
     /* Write Spike Pattern */
     // Select Spike Pattern Memory
     AXI_WRITE(MEM_CFG_REG, 32'h2);
-    // for (i = 0; i < 2**MAX_TIMESTEPS_BITS; i = i + 1) begin
-    //     // Loop through each input spike batch
-    //     for (j = 0; j < 2**SPIKE_PATTERN_BATCH_ADDR_WIDTH; j = j + 1) begin
-    //         // Select Spike Pattern Memory & Batch
-    //         AXI_WRITE(MEM_CFG_REG, {j[5:0],2'h2});
-    //         // Select the input spike batch
-    //         if(i % 2 == 0)
-    //             AXI_WRITE(EXT_MEM_OFFSET + i, 32'b0000_1111_1010_0101_0000_1111_1010_0101);
-    //         else
-    //             AXI_WRITE(EXT_MEM_OFFSET + i, 32'b1111_0000_0101_1010_1111_0000_0010_0001);
-    //     end
-    // end
     input_pattern_file = $fopen("/home/oshears/Documents/vt/research/code/verilog/snn_fpga/rtl/tb/input_spike_patterns/mnist/input0.txt","r");
-    // $display("Line: %s",line);
     timestep_cntr = 0;
-    while(!$feof(input_pattern_file)) begin
+    while(!$feof(input_pattern_file) && timestep_cntr < SIM_TIME) begin
         $fgets(line,input_pattern_file);
         input_cntr = 0;
         // Loop through each input on the line
+        spike_pattern[timestep_cntr] = 0;
         for(i = 0; i < line.len(); i++) begin
             spike_value_str = line.substr(i,i);
             if (spike_value_str != "0" && spike_value_str != "1") continue;
@@ -245,19 +222,13 @@ initial begin
 
         $display("Spikes @ %d: %b",timestep_cntr,spike_pattern[timestep_cntr]);
 
-        // Loop through each input spike batch
-        // DEBUG, select only the first batch
-        //AXI_WRITE(MEM_CFG_REG, {6'b000000,2'h2});
-        // Select the input spike batch
-        // DEBUG: write only the first batch
-        //AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][31:0]);
-
-        for (i = 0; i < NUM_INPUTS / SPIKES_PER_BATCH; i++) begin
+        for (i = 0; i < NUM_INPUT_SPIKE_BATCHES; i++) begin
+            $display("Writing spikes @ timestep: %d for batch %d range: [%d:%d] == %b",timestep_cntr,i,SPIKES_PER_BATCH * (i + 1) - 1,SPIKES_PER_BATCH * i, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 -: SPIKES_PER_BATCH]);
             // Select Batch
             AXI_WRITE(MEM_CFG_REG, {i[5:0],2'h2});
             // Write Spike Pattern at batch index
-            // AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 : SPIKES_PER_BATCH * i]);
-            AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 +: SPIKES_PER_BATCH]);
+            AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 -: SPIKES_PER_BATCH]);
+            AXI_READ(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 -: SPIKES_PER_BATCH],0,1);
         end
 
         timestep_cntr++;
@@ -265,7 +236,7 @@ initial begin
 
 
     /* Set Sim Time to 100 */
-    AXI_WRITE(SIM_TIME_REG, 100);
+    AXI_WRITE(SIM_TIME_REG, SIM_TIME);
 
     /* Start the Network */
     AXI_WRITE(CTRL_REG, 32'h1);
