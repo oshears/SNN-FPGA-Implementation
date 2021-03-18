@@ -247,10 +247,18 @@ initial begin
 
         // Loop through each input spike batch
         // DEBUG, select only the first batch
-        AXI_WRITE(MEM_CFG_REG, {6'b000000,2'h2});
+        //AXI_WRITE(MEM_CFG_REG, {6'b000000,2'h2});
         // Select the input spike batch
         // DEBUG: write only the first batch
-        AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][31:0]);
+        //AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][31:0]);
+
+        for (i = 0; i < NUM_INPUTS / SPIKES_PER_BATCH; i++) begin
+            // Select Batch
+            AXI_WRITE(MEM_CFG_REG, {i[5:0],2'h2});
+            // Write Spike Pattern at batch index
+            // AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 : SPIKES_PER_BATCH * i]);
+            AXI_WRITE(EXT_MEM_OFFSET + timestep_cntr, spike_pattern[timestep_cntr][SPIKES_PER_BATCH * (i + 1) - 1 +: SPIKES_PER_BATCH]);
+        end
 
         timestep_cntr++;
     end
