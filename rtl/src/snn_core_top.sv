@@ -4,9 +4,9 @@ module snn_core_top
     parameter C_S_AXI_ACLK_FREQ_HZ = 100000000,
     parameter C_S_AXI_DATA_WIDTH = 32,
     parameter C_S_AXI_ADDR_WIDTH = 16,
-    parameter THRESH=15,
-    parameter RESET=0,
-    parameter REFRAC=5,
+    parameter [61:0] THRESH=15,
+    parameter [61:0] RESET=0,
+    parameter [61:0] REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,
@@ -106,13 +106,10 @@ wire spike_output_count_mem_wen;
 wire [31 : 0] spike_output_count_mem_data_in;
 wire [31 : 0] spike_output_count_mem_data_out;
 
-wire sim_time_done;
 
 assign busy = ~done;
 
-assign sim_time_done = (sim_time_cntr_out < sim_time);
-
-assign network_done = (sim_time_cntr_out == sim_time);
+assign network_done = ( sim_time_cntr_out == (sim_time - 1) );
 
 assign spike_pattern_spike_in = spike_en ? spike_pattern_spike_in_i : 0;
 assign bernoulli_spike_in = spike_en ? bernoulli_spike_in_i : 0;
@@ -342,7 +339,6 @@ snn_core_controller snn_core_controller
 .output_cntr_rst(output_cntr_rst),
 .output_cntr_en(output_cntr_en),
 .done(done),
-.sim_time_done(sim_time_done),
 .network_en(network_en)
 );
 

@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 module if_neuron 
 #(
-    parameter THRESH=10,
-    parameter RESET=0,
+    parameter [61:0] THRESH=10,
+    parameter [61:0] RESET=0,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     // parameter WEIGHT_FILENAME="neuron.txt"
@@ -21,8 +21,8 @@ module if_neuron
     output reg [WEIGHT_SIZE - 1 : 0] mem_dout = 0
 );
 
-reg [WEIGHT_SIZE - 1:0] potential = 0;
-reg [WEIGHT_SIZE - 1:0] threshold = THRESH;
+reg [63:0] potential = RESET;
+reg [63:0] threshold = THRESH;
 
 integer input_index = 0;
 integer weight_index = 0;
@@ -31,7 +31,7 @@ assign spike_out = (potential >= threshold) ? 1 : 0;
 
 // reg [WEIGHT_SIZE-1:0] weight_mem [NUM_INPUTS-1:0];
 
-wire [WEIGHT_SIZE - 1 : 0] spike_accumulator_outputs [NUM_INPUTS - 1 : 0];
+wire [2*WEIGHT_SIZE - 1 : 0] spike_accumulator_outputs [NUM_INPUTS - 1 : 0];
 reg  [WEIGHT_SIZE - 1 : 0]  spike_accumulator_weights [NUM_INPUTS - 1 : 0];
 
 // initialize weight memory
@@ -78,7 +78,7 @@ generate
 endgenerate
 
 always_comb begin
-    potential = 0;
+    potential = RESET;
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
         potential = potential + spike_accumulator_outputs[input_index];
     end 

@@ -8,7 +8,7 @@ DATA_WIDTH = 32
     input clk,
     input en,
     input rst,
-    output reg [DATA_WIDTH - 1 : 0] dout
+    output reg [DATA_WIDTH - 1 : 0] dout = 0
 );
 
 always @(posedge clk, posedge rst)

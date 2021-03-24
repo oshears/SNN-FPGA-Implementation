@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 module if_network
 #(
-    parameter THRESH=15,
-    parameter RESET=0,
-    parameter REFRAC=5,
+    parameter [61:0] THRESH=15,
+    parameter [61:0] RESET=0,
+    parameter [61:0] REFRAC=5,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,

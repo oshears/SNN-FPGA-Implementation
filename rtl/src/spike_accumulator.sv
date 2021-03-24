@@ -8,7 +8,7 @@ DATA_WIDTH = 32
     input spike_in,
     input [DATA_WIDTH-1:0] spike_weight,
     input rst,
-    output reg [DATA_WIDTH-1:0] dout
+    output reg [2*DATA_WIDTH-1:0] dout
 );
 
 always @(posedge spike_in, posedge rst)

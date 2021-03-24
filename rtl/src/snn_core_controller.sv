@@ -7,7 +7,6 @@ module snn_core_controller
     input wire network_start,
     input wire network_done,
     input wire outputs_done,
-    input wire sim_time_done,
 
     output reg output_cntr_rst = 0,
     output reg output_cntr_en = 0,
@@ -33,7 +32,6 @@ always @(
     network_start,
     network_done,
     outputs_done,
-    sim_time_done,
     current_state
     )
     begin
