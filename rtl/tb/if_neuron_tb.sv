@@ -20,7 +20,6 @@ wire spike_out;
 
 wire [WEIGHT_SIZE - 1 : 0] mem_dout;
 
-integer i = 0;
 
 if_neuron 
 #(
@@ -57,6 +56,8 @@ end
 
 
 initial begin
+    static integer i = 0;
+
     rst = 1;
     WAIT(1);
     rst = 0;
