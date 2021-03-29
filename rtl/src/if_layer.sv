@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 module if_layer
 #(
-    parameter [61:0] THRESH=15,
-    parameter [61:0] RESET=0,
-    parameter [61:0] REFRAC=5,
     parameter WEIGHT_SIZE=32,
+    parameter [2 * WEIGHT_SIZE - 1:0] THRESH=15,
+    parameter [2 * WEIGHT_SIZE - 1:0] RESET=0,
+    parameter [2 * WEIGHT_SIZE - 1:0] REFRAC=5,
     parameter NUM_INPUTS=4,
     parameter NUM_NEURONS=1,
     parameter SINGLE_SPIKE=0,

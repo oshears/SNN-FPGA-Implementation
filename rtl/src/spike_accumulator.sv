@@ -16,7 +16,7 @@ begin
     if (rst)
         dout <= 0;
     else
-        dout <= dout + spike_weight;
+        dout <= dout + {{32{spike_weight[DATA_WIDTH-1]}},spike_weight};
 end
 
 endmodule

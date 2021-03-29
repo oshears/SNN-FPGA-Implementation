@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 module if_network
 #(
-    parameter [61:0] THRESH=15,
-    parameter [61:0] RESET=0,
-    parameter [61:0] REFRAC=5,
     parameter WEIGHT_SIZE=32,
+    parameter [2 * WEIGHT_SIZE - 1:0] THRESH=15,
+    parameter [2 * WEIGHT_SIZE - 1:0] RESET=0,
+    parameter [2 * WEIGHT_SIZE - 1:0] REFRAC=5,
     parameter NUM_INPUTS=4,
     parameter NUM_LAYERS=1,
     parameter [31 : 0]  NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},

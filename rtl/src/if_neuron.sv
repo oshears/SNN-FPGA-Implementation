@@ -5,7 +5,6 @@ module if_neuron
     parameter [61:0] RESET=0,
     parameter WEIGHT_SIZE=32,
     parameter NUM_INPUTS=4,
-    // parameter WEIGHT_FILENAME="neuron.txt"
     parameter WEIGHT_ADDR_WIDTH=8
 )
 (
@@ -21,11 +20,9 @@ module if_neuron
     output reg [WEIGHT_SIZE - 1 : 0] mem_dout = 0
 );
 
-reg [63:0] potential = RESET;
-reg [63:0] threshold = THRESH;
+reg [2 * WEIGHT_SIZE - 1:0] potential = RESET;
+reg [2 * WEIGHT_SIZE - 1:0] threshold = THRESH;
 
-integer input_index = 0;
-integer weight_index = 0;
 
 assign spike_out = (potential >= threshold) ? 1 : 0;
 
@@ -34,20 +31,7 @@ assign spike_out = (potential >= threshold) ? 1 : 0;
 wire [2*WEIGHT_SIZE - 1 : 0] spike_accumulator_outputs [NUM_INPUTS - 1 : 0];
 reg  [WEIGHT_SIZE - 1 : 0]  spike_accumulator_weights [NUM_INPUTS - 1 : 0];
 
-// initialize weight memory
-/*
-initial begin
-    weight_file = $fopen(WEIGHT_FILENAME,"r");
 
-    for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
-        $fscanf(weight_file,"%h\n",weight_file_input);
-        weight_mem[input_index] = weight_file_input;
-        spike_accumulator_weights[input_index] = weight_file_input;
-    end
-    
-    $fclose(weight_file);
-end
-*/
 always @(posedge mem_clk) begin
     if (mem_addr < NUM_INPUTS) begin
         if(mem_wen) begin
@@ -78,24 +62,24 @@ generate
 endgenerate
 
 always_comb begin
+    integer input_index = 0;
+    
+    // set potential equal to reset value
     potential = RESET;
+
+    // add all the spike accumulators to the potential
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
         potential = potential + spike_accumulator_outputs[input_index];
     end 
 end
 
 initial begin
+    integer weight_index = 0;
+
     for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
         spike_accumulator_weights[weight_index] = 32'b1;
     end
 end
-
-// always @(posedge rst) begin
-//     for (weight_index = 0; weight_index < NUM_INPUTS; weight_index = weight_index + 1) begin
-//         spike_accumulator_weights[weight_index] = 32'b1;
-//     end
-//     threshold = THRESH;
-// end
 
 
 endmodule

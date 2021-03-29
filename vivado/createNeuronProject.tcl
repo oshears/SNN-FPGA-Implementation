@@ -26,9 +26,9 @@ add_files -fileset sim_1 -norecurse ../rtl/tb/neuron.txt
 add_files -fileset sim_1 ../rtl/tb/neuron_weights/
 # add_files -fileset sim_1 ../rtl/tb/neuron_test_weights/
 
-# set_property top if_neuron_tb [get_filesets sim_1]
+set_property top if_neuron_tb [get_filesets sim_1]
 # set_property top if_network_tb [get_filesets sim_1]
-set_property top if_network_test_tb [get_filesets sim_1]
+# set_property top if_network_test_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
 
 update_compile_order -fileset sources_1
@@ -39,4 +39,4 @@ set_property -name {xsim.simulate.runtime} -value {all} -objects [get_filesets s
 
 launch_simulation
 
-add_wave {{/if_network_tb/uut}} 
+# add_wave {{/if_network_tb/uut}} 
