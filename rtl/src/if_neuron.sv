@@ -69,6 +69,7 @@ always_comb begin
 
     // add all the spike accumulators to the potential
     for(input_index = 0; input_index < NUM_INPUTS; input_index = input_index + 1) begin
+        // TODO: add a minimum value to the membrane potential
         potential = potential + spike_accumulator_outputs[input_index];
     end 
 end
