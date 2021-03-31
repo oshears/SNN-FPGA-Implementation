@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module if_network
+module if_recurrent_network
 #(
     parameter WEIGHT_SIZE=32,
     parameter [2 * WEIGHT_SIZE - 1:0] THRESH=15,
