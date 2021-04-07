@@ -28,10 +28,11 @@ module if_recurrent_network
 localparam NUM_LAYER_INPUTS = NUM_HIDDEN_LAYER_NEURONS[0] + NUM_INPUTS;
 
 wire [NUM_LAYER_INPUTS - 1 : 0] layer_spikes = {spike_out,spike_in};
-
 wire [LAYER_ADDR_WIDTH - NEURON_ADDR_WIDTH - WEIGHT_ADDR_WIDTH:0] layer_mem_sel;
-assign layer_mem_sel = mem_addr[LAYER_ADDR_WIDTH - 1:NEURON_ADDR_WIDTH];
 wire [NEURON_ADDR_WIDTH-1:0] mem_addr_i;
+
+assign layer_mem_sel = mem_addr[LAYER_ADDR_WIDTH - 1:NEURON_ADDR_WIDTH];
+
 assign mem_addr_i = mem_addr[NEURON_ADDR_WIDTH-1:0]; 
 
 if_layer 

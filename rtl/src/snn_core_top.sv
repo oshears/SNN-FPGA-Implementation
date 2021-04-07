@@ -4,13 +4,21 @@ module snn_core_top
     parameter C_S_AXI_ACLK_FREQ_HZ = 100000000,
     parameter C_S_AXI_DATA_WIDTH = 32,
     parameter C_S_AXI_ADDR_WIDTH = 16,
+    // Neuron Threshold
     parameter [61:0] THRESH=15,
+    // Neuron Membrane Potential Reset Value
     parameter [61:0] RESET=0,
+    // Refractory Period
     parameter [61:0] REFRAC=5,
+    // Weight Size in Bits
     parameter WEIGHT_SIZE=32,
+    // Number of Network Inputs (e.g. pixels)
     parameter NUM_INPUTS=4,
+    // Number of layers
     parameter NUM_LAYERS=1,
+    // Number of neurons per layer
     parameter [31 : 0] NUM_HIDDEN_LAYER_NEURONS [NUM_LAYERS - 1 : 0] = {32'h1},
+    // Parameters to configure spike pattern memory
     parameter MAX_TIMESTEPS_BITS = 8,
     parameter SPIKE_PATTERN_BATCH_ADDR_WIDTH = 6,
     parameter SPIKES_PER_BATCH = 32,
